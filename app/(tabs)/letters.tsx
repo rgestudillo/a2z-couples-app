@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
-import AlphabetGrid from '../../components/AlphabetGrid';
-import { useIdeas, IdeaType } from '../../context/IdeasContext';
+import AlphabetGrid from '@/components/AlphabetGrid';
+import { useIdeas, IdeaType } from '@/context/IdeasContext';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function LettersScreen() {

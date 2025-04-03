@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useIdeas, IdeaType } from '../../context/IdeasContext';
-import { getProductById } from '../../data/products';
-import { GiftIdea } from '../../data/giftIdeas';
+import { useIdeas, IdeaType } from '@/context/IdeasContext';
+import { getProductById } from '@/api/product';
+import { GiftIdea } from '@/model/GiftIdea';
 
 export default function ProductDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();

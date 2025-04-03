@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Linking, Image } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getBusinessById } from '../../data/businesses';
+import { getBusinessById } from '@/api/business';
 
 export default function BusinessDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();

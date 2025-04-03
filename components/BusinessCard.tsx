@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Business } from '../data/businesses';
-import { useIdeas } from '../context/IdeasContext';
+import { useIdeas } from '@/context/IdeasContext';
+import { Business } from '@/model/Business';
 
 interface BusinessCardProps {
     business: Business;

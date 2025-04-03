@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, SafeAreaView, TextInput, TouchableOpacity, Image } from 'react-native';
-import { getAllBusinesses, Business } from '../../data/businesses';
-import BusinessCard from '../../components/BusinessCard';
+import { getAllBusinesses } from '@/api/business';
+import { Business } from '@/model/Business';
+import BusinessCard from '@/components/BusinessCard';
 import { Ionicons } from '@expo/vector-icons';
-import { useIdeas, IdeaType, GiftIdea } from '../../context/IdeasContext';
-import ProductCard from '../../components/ProductCard';
+import { useIdeas, IdeaType, GiftIdea } from '@/context/IdeasContext';
+import ProductCard from '@/components/ProductCard';
 
 // Mock product data - to be replaced with actual API/data later
 const mockProducts = [

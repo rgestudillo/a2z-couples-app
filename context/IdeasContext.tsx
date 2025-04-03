@@ -1,9 +1,11 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import dateIdeas, { DateIdea } from '../data/dateIdeas';
-import giftIdeas, { GiftIdea } from '../data/giftIdeas';
-import { Business } from '../data/businesses';
-import products from '../data/products';
+import dateIdeas from '@/api/date';
+import giftIdeas from '@/api/gift';
+
+import { Business } from '@/model/Business';
+import { DateIdea } from '@/model/DateIdea';
+import { GiftIdea } from '@/model/GiftIdea';
 
 // Base idea interface that all idea types will extend
 export interface BaseIdea {

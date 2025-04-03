@@ -7,7 +7,7 @@ import {
     Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { IdeaType, useIdeas } from '../context/IdeasContext';
+import { IdeaType, useIdeas } from '@/context/IdeasContext';
 
 const CategorySelector: React.FC = () => {
     const { currentCategory, setCurrentCategory } = useIdeas();

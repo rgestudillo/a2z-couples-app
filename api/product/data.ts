@@ -1,15 +1,4 @@
-export interface Product {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    priceRange: '$' | '$$' | '$$$';
-    rating: number;
-    imageUrl: string;
-    affiliateLink: string;
-    relatedIdeaIds: string[];
-    tags: string[];
-}
+import { Product } from '@/model/Product';
 
 // Mock product data
 const products: Product[] = [
@@ -50,19 +39,5 @@ const products: Product[] = [
         tags: ['Food', 'Sweets', 'Gift']
     }
 ];
-
-// Helper function to get products related to a specific idea
-export function getProductsByIdeaId(ideaId: string): Product[] {
-    return products.filter(product => product.relatedIdeaIds.includes(ideaId));
-}
-
-// Helper function to get a specific product by ID
-export function getProductById(id: string): Product | undefined {
-    return products.find(product => product.id === id);
-}
-
-export function getAllProducts(): Product[] {
-    return products;
-}
 
 export default products; 

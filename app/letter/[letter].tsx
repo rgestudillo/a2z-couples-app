@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, SafeAreaView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import IdeaCard from '../../components/IdeaCard';
-import { useIdeas, IdeaType } from '../../context/IdeasContext';
+import IdeaCard from '@/components/IdeaCard';
+import { useIdeas, IdeaType } from '@/context/IdeasContext';
 
 export default function LetterIdeasScreen() {
     const { letter, category } = useLocalSearchParams<{ letter: string, category: string }>();

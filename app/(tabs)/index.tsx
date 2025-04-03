@@ -9,13 +9,12 @@ import {
   TouchableOpacity,
   Image
 } from 'react-native';
-import AlphabetGridCompact from '../../components/AlphabetGridCompact';
-import IdeaCard from '../../components/IdeaCard';
-import { useIdeas, IdeaType } from '../../context/IdeasContext';
-import { BaseIdea } from '../../context/IdeasContext';
+import IdeaCard from '@/components/IdeaCard';
+import { useIdeas, IdeaType } from '@/context/IdeasContext';
+import { BaseIdea } from '@/context/IdeasContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import CategorySelector from '../../components/CategorySelector';
+import CategorySelector from '@/components/CategorySelector';
 import IdentificationCard from '../../components/IdentificationCard';
 
 export default function HomeScreen() {

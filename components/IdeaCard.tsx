@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { BaseIdea, IdeaType, useIdeas, DateIdea, GiftIdea } from '../context/IdeasContext';
+import { BaseIdea, IdeaType, useIdeas, DateIdea, GiftIdea } from '@/context/IdeasContext';
 
 interface IdeaCardProps {
     idea: BaseIdea;

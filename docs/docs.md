@@ -60,11 +60,20 @@ A2Z is a React Native mobile application that provides users with ideas organize
   ProductCard.tsx   # Card component for products
 /context            # React Context for state management
   IdeasContext.tsx  # Context for managing all idea types and favorites
-/data               # Local data
-  dateIdeas.ts      # Date ideas dataset
-  giftIdeas.ts      # Gift ideas dataset
-  businesses.ts     # Business data related to date ideas
-  products.ts       # Product data related to gift ideas with affiliate links
+/api                # API layer for data access
+  /date             # Date ideas API
+    data.ts         # Date ideas dataset
+    index.ts        # Date ideas helper functions
+  /gift             # Gift ideas API
+    data.ts         # Gift ideas dataset
+    index.ts        # Gift ideas helper functions
+  /business         # Business data API
+    data.ts         # Business dataset
+    index.ts        # Business helper functions
+  /product          # Product data API
+    data.ts         # Product dataset
+    index.ts        # Product helper functions
+  index.ts          # Main API export file
 /constants          # App constants, themes, etc.
 /hooks              # Custom React hooks
 /services           # Services for affiliate link tracking
@@ -86,11 +95,101 @@ A2Z is a React Native mobile application that provides users with ideas organize
 - AsyncStorage for local data persistence
 - Expo for simplified development and testing
 - Affiliate link integration for monetization
+- Modular API structure for data management
 
 ### Design
 - Modern, clean UI with category-specific aesthetics
 - Responsive design for various screen sizes
 - Accessibility considerations
+
+### API Structure
+
+The application uses a modular API structure to organize and access data:
+
+#### Main API Module
+The main API module (`/api/index.ts`) exports all data and helper functions from each category:
+
+```typescript
+// Available imports
+import { 
+  // Date ideas
+  dateIdeas, getAllDateIdeas, getDateIdeaById, getDateIdeasByLetter, getDateIdeasByCategory,
+  
+  // Gift ideas
+  giftIdeas, getAllGiftIdeas, getGiftIdeaById, getGiftIdeasByLetter, getGiftIdeasByCategory, getGiftIdeasByOccasion,
+  
+  // Products
+  products, getAllProducts, getProductById, getProductsByIdeaId,
+  
+  // Businesses
+  businesses, getAllBusinesses, getBusinessById, getBusinessesByIdeaId
+} from '@/api';
+```
+
+#### Date Ideas API
+The Date Ideas API (`/api/date/index.ts`) provides functions to access date ideas:
+
+```typescript
+// Get all date ideas
+const allDateIdeas = getAllDateIdeas();
+
+// Get date ideas by letter
+const letterADateIdeas = getDateIdeasByLetter('A');
+
+// Get a specific date idea by ID
+const dateIdea = getDateIdeaById('a1');
+
+// Get date ideas by category
+const outdoorDateIdeas = getDateIdeasByCategory('Outdoor');
+```
+
+#### Gift Ideas API
+The Gift Ideas API (`/api/gift/index.ts`) provides functions to access gift ideas:
+
+```typescript
+// Get all gift ideas
+const allGiftIdeas = getAllGiftIdeas();
+
+// Get gift ideas by letter
+const letterBGiftIdeas = getGiftIdeasByLetter('B');
+
+// Get a specific gift idea by ID
+const giftIdea = getGiftIdeaById('gift-1');
+
+// Get gift ideas by category
+const technologyGifts = getGiftIdeasByCategory('Technology');
+
+// Get gift ideas by occasion
+const birthdayGifts = getGiftIdeasByOccasion('Birthday');
+```
+
+#### Products API
+The Products API (`/api/product/index.ts`) provides functions to access product data:
+
+```typescript
+// Get all products
+const allProducts = getAllProducts();
+
+// Get a specific product by ID
+const product = getProductById('prod-1');
+
+// Get products related to a specific idea
+const relatedProducts = getProductsByIdeaId('gift-1');
+```
+
+#### Businesses API
+The Businesses API (`/api/business/index.ts`) provides functions to access business data:
+
+```typescript
+// Get all businesses
+const allBusinesses = getAllBusinesses();
+
+// Get a specific business by ID
+const business = getBusinessById('bus-a1-1');
+
+// Get businesses related to a specific idea
+const relatedBusinesses = getBusinessesByIdeaId('a1');
+```
 
 ### Data Structures
 #### Base Idea Structure

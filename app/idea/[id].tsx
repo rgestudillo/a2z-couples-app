@@ -2,62 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Linking, Modal, Image, ScrollView, Alert } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useIdeas, IdeaType, DateIdea, GiftIdea } from '../../context/IdeasContext';
-import { getBusinessesByIdeaId, Business } from '../../data/businesses';
-import BusinessCard from '../../components/BusinessCard';
+import { useIdeas, IdeaType, DateIdea, GiftIdea } from '@/context/IdeasContext';
+import { getBusinessesByIdeaId } from '@/api/business';
+import { Business } from '@/model/Business';
+import BusinessCard from '@/components/BusinessCard';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MemoriesGallery } from '../../components/memories';
-
-// Mock product data - to be replaced with actual data file later
-const mockProducts = [
-    {
-        id: 'prod-1',
-        name: 'Apple Watch Series 7',
-        description: 'The latest Apple Watch with advanced health features',
-        price: 399.99,
-        priceRange: '$$$' as const,
-        rating: 4.8,
-        imageUrl: 'https://example.com/apple-watch.jpg',
-        affiliateLink: 'https://amazon.com/product/123',
-        relatedIdeaIds: ['gift-1'],
-        tags: ['Technology', 'Wearables']
-    },
-    {
-        id: 'prod-2',
-        name: 'Weighted Blanket',
-        description: 'Premium weighted blanket for better sleep and relaxation',
-        price: 89.99,
-        priceRange: '$$' as const,
-        rating: 4.6,
-        imageUrl: 'https://example.com/blanket.jpg',
-        affiliateLink: 'https://amazon.com/product/456',
-        relatedIdeaIds: ['gift-2'],
-        tags: ['Home', 'Comfort']
-    },
-    {
-        id: 'prod-3',
-        name: 'Gourmet Chocolate Box',
-        description: 'Assorted gourmet chocolates in an elegant gift box',
-        price: 45.99,
-        priceRange: '$$' as const,
-        rating: 4.5,
-        imageUrl: 'https://example.com/chocolate.jpg',
-        affiliateLink: 'https://amazon.com/product/789',
-        relatedIdeaIds: ['gift-3'],
-        tags: ['Food', 'Sweets']
-    }
-];
-
-// Helper function to get products by gift idea ID
-const getProductsByIdeaId = (ideaId: string) => {
-    return mockProducts.filter(product =>
-        product.relatedIdeaIds.includes(ideaId)
-    );
-};
+import { MemoriesGallery } from '@/components/memories';
+import { getProductsByIdeaId } from '@/api/product';
+import { Product } from '@/model/Product';
 
 interface ProductCardProps {
-    product: typeof mockProducts[0];
+    product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
@@ -272,7 +228,7 @@ export default function IdeaDetailScreen() {
             <View style={styles.categoryContainer}>
                 <Text style={styles.categoryTitle}>Categories:</Text>
                 <View style={styles.categoryTags}>
-                    {idea.category.map((cat, index) => (
+                    {idea.category.map((cat: string, index: number) => (
                         <View key={index} style={styles.categoryTag}>
                             <Text style={styles.categoryText}>{cat}</Text>
                         </View>

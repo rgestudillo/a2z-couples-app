@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Dimensions, Image, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import IdeaCard from '../../components/IdeaCard';
-import { useIdeas, IdeaType, DateIdea, GiftIdea } from '../../context/IdeasContext';
-import AlphabetGridCompact from '../../components/AlphabetGridCompact';
+import IdeaCard from '@/components/IdeaCard';
+import { useIdeas, IdeaType } from '@/context/IdeasContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
