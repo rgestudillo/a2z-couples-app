@@ -1,50 +1,56 @@
-# Welcome to your Expo app 👋
+# A2Z Couples App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A dating ideas application that provides an alphabetical list of date ideas (A to Z) with the ability to browse, favorite, and find businesses related to each idea.
 
-## Get started
+## Features
 
-1. Install dependencies
+### Date Ideas A-Z
 
-   ```bash
-   npm install
-   ```
+- Browse date ideas organized alphabetically (A through Z)
+- Each idea includes a description, cost estimate, duration, and categories
+- View detailed information for each idea
+- Navigate through the alphabet grid for quick access to ideas
 
-2. Start the app
+### Business Recommendations
 
-   ```bash
-    npx expo start
-   ```
+- Find local businesses related to each date idea
+- View detailed business information including:
+  - Rating and price range
+  - Business description
+  - Address and contact information
+  - Opening hours
+  - Categories and tags
+- Search for businesses by name, category, or keyword
 
-In the output, you'll find options to open the app in a
+### Favorites
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Save your favorite date ideas for quick access
+- Remove ideas from favorites easily
+- Plan your next date night with a curated list of your favorite ideas
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Screens
 
-## Get a fresh project
+1. **Home** - Introduction to the app and featured ideas
+2. **A-Z Browse** - Alphabet grid navigation to browse ideas by letter
+3. **Idea Detail** - Detailed information about a specific date idea with related businesses
+4. **Business Listing** - Search and browse all businesses
+5. **Business Detail** - Detailed information about a specific business including contact info and hours
+6. **Favorites** - A collection of the user's saved date ideas
 
-When you're ready, run:
+## Technologies Used
 
-```bash
-npm run reset-project
-```
+- React Native
+- Expo
+- TypeScript
+- Expo Router for navigation
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Getting Started
 
-## Learn more
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start the development server: `npm start`
+4. Use Expo Go on your mobile device to view the app or run on a simulator
 
-To learn more about developing your project with Expo, look at the following resources:
+## License
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This project is licensed under the MIT License.
