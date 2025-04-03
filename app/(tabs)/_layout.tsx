@@ -12,7 +12,8 @@ export default function TabLayout() {
           fontSize: 12,
         },
         tabBarStyle: {
-          height: 60,
+          height: 65,
+          paddingVertical: 20,
         },
         headerStyle: {
           backgroundColor: '#ffffff',
@@ -30,7 +31,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
-          headerTitle: 'A2Z Dating Ideas',
+          headerTitle: 'A2Z Ideas',
         }}
       />
       <Tabs.Screen
@@ -44,13 +45,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="businesses"
+        name="browse"
         options={{
-          title: 'Places',
+          title: 'Browse',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="business" size={size} color={color} />
+            <Ionicons name="search" size={size} color={color} />
           ),
-          headerTitle: 'Date Spots',
+          headerShown: false,
         }}
       />
       <Tabs.Screen

@@ -1,68 +1,81 @@
-# A2Z - Couples Dating Ideas App
+# A2Z - The Ultimate A to Z Ideas App
 
 ## Overview
-A2Z is a React Native mobile application that provides couples with dating ideas organized alphabetically from A to Z. The app aims to inspire couples with creative date ideas and activities to keep their relationship fresh and exciting. It also includes business recommendations related to date ideas to help couples find the perfect places to bring their date ideas to life.
+A2Z is a React Native mobile application that provides users with ideas organized alphabetically from A to Z across multiple categories. The app aims to be a comprehensive platform where users can discover and record everything from date ideas to gift suggestions. Each category follows the A-Z format to create an engaging and structured browsing experience, with affiliate links to products and businesses where applicable.
 
 ## Core Features
 
-### MVP (Minimum Viable Product)
-- **Alphabetical Browsing**: Browse date ideas organized by the letters A-Z
-- **Letter Categories**: Tap on any letter to see all date ideas starting with that letter
-- **Idea Details**: Each dating idea includes a title, description, estimated cost, duration, and category
+### Current Features
+- **Alphabetical Browsing**: Browse ideas organized by the letters A-Z
+- **Letter Categories**: Tap on any letter to see all ideas starting with that letter
+- **Multiple Idea Types**: Currently supports Date Ideas and Gift Ideas, with more categories planned
+- **Idea Details**: Each idea includes a title, description, estimated cost, and category
 - **Business Recommendations**: View businesses related to each date idea
-- **Business Details**: See detailed information about businesses including ratings, contact info, and hours
-- **Favorites**: Users can save their favorite date ideas
-- **Simple UI/UX**: Clean, intuitive interface designed for couples
+- **Product Recommendations**: View products related to gift ideas with affiliate links
+- **Favorites**: Users can save their favorite ideas across categories
+- **Simple UI/UX**: Clean, intuitive interface designed for easy navigation
 - **Cross-platform**: Works on both iOS and Android devices
 
+### Categories
+1. **Date Ideas**: Creative date suggestions for couples with business recommendations
+2. **Gift Ideas**: Gift suggestions with affiliate links to purchase options
+
 ### Future Enhancements
-- **User Accounts**: Allow couples to create shared accounts
-- **Date Planner**: Calendar integration for planning dates
-- **Completed Dates**: Track completed date ideas
-- **Custom Ideas**: Allow users to add their own date ideas
-- **Notifications**: Reminders for planned dates
+- **More A-Z Categories**: Expand to include A-Z meal ideas, activity ideas, etc.
+- **User Accounts**: Allow users to create accounts to save preferences
+- **Planning Tools**: Calendar integration for planning dates and gift purchases
+- **Completed Items**: Track completed date ideas and purchased gifts
+- **Custom Ideas**: Allow users to add their own ideas to any category
+- **Notifications**: Reminders for planned dates or important gift-giving occasions
 - **Location-based Suggestions**: Filter ideas based on location or weather
-- **Challenges**: Complete A-Z date challenges with rewards/achievements
-- **Business Reviews**: Allow users to rate and review businesses
-- **Save Favorite Businesses**: Let users bookmark businesses they want to visit
+- **Challenges**: Complete A-Z challenges with rewards/achievements
+- **Reviews**: Allow users to rate and review businesses and products
+- **Save Favorites**: Let users bookmark businesses and products they want to revisit
 
 ## App Architecture
 
 ### Navigation Flow
-1. **Home Screen**: Displays A-Z alphabet grid and featured ideas
-2. **Letter Screen**: Shows all date ideas for the selected letter
-3. **Detail Screen**: Displays full details of the selected date idea with related businesses
-4. **Business Screen**: Shows all businesses with search functionality
-5. **Business Detail Screen**: Displays detailed information about a specific business
-6. **Favorites Screen**: Shows saved favorite date ideas
+1. **Home Screen**: Displays category selection and A-Z alphabet grid
+2. **Category Screen**: Shows selected category (Date Ideas, Gift Ideas, etc.)
+3. **Letter Screen**: Shows all ideas for the selected letter within a category
+4. **Detail Screen**: Displays full details of the selected idea with related businesses/products
+5. **Business/Product Screen**: Shows all businesses/products with search functionality
+6. **Business/Product Detail Screen**: Displays detailed information
+7. **Favorites Screen**: Shows saved favorite ideas across categories
 
 ### Project Structure
 ```
 /app                # Expo Router screens and navigation
-  /(tabs)           # Tab-based navigation screens (Home, Letters, Businesses, Favorites)
+  /(tabs)           # Tab-based navigation screens (Home, Categories, Favorites)
   /letter           # Letter-specific screens
-  /idea             # Idea detail screen
+  /idea             # Idea detail screens (date, gift, etc.)
   /business         # Business detail screen
+  /product          # Product detail screen
 /assets             # Images, fonts, static resources
 /components         # Reusable UI components
   /ui               # Basic UI components
   AlphabetGrid.tsx  # Grid of A-Z letters
-  IdeaCard.tsx      # Card component for date ideas
+  IdeaCard.tsx      # Card component for various idea types
   BusinessCard.tsx  # Card component for businesses
+  ProductCard.tsx   # Card component for products
 /context            # React Context for state management
-  DateIdeasContext.tsx # Context for managing date ideas and favorites
+  IdeasContext.tsx  # Context for managing all idea types and favorites
 /data               # Local data
   dateIdeas.ts      # Date ideas dataset
+  giftIdeas.ts      # Gift ideas dataset
   businesses.ts     # Business data related to date ideas
+  products.ts       # Product data related to gift ideas with affiliate links
 /constants          # App constants, themes, etc.
 /hooks              # Custom React hooks
+/services           # Services for affiliate link tracking
 ```
 
 ### Key Components
-- **AlphabetGrid**: Grid of A-Z letters on the home screen
-- **IdeaCard**: Card component for each date idea
+- **AlphabetGrid**: Grid of A-Z letters on category screens
+- **IdeaCard**: Card component for each idea (date, gift, etc.)
 - **BusinessCard**: Card component for each business
-- **DateIdeasContext**: Context provider for state management
+- **ProductCard**: Card component for each product with affiliate link
+- **IdeasContext**: Context provider for state management of all idea types
 
 ## Technical Requirements
 
@@ -72,24 +85,40 @@ A2Z is a React Native mobile application that provides couples with dating ideas
 - React Context API for state management
 - AsyncStorage for local data persistence
 - Expo for simplified development and testing
+- Affiliate link integration for monetization
 
 ### Design
-- Modern, clean UI with a romantic/fun aesthetic
+- Modern, clean UI with category-specific aesthetics
 - Responsive design for various screen sizes
 - Accessibility considerations
 
 ### Data Structures
-#### Date Ideas Structure
+#### Base Idea Structure
 ```typescript
-interface DateIdea {
+interface BaseIdea {
   id: string;
   title: string;
   letter: string;
   description: string;
   cost: '$' | '$$' | '$$$';
-  duration: string;
   category: string[];
   image?: string;
+}
+```
+
+#### Date Idea Structure
+```typescript
+interface DateIdea extends BaseIdea {
+  duration: string;
+  relatedBusinessIds: string[];
+}
+```
+
+#### Gift Idea Structure
+```typescript
+interface GiftIdea extends BaseIdea {
+  occasion: string[];
+  relatedProductIds: string[];
 }
 ```
 
@@ -106,6 +135,22 @@ interface Business {
   rating: number;
   imageUrl?: string;
   hours?: {day: string; hours: string}[] | string;
+  relatedIdeaIds: string[];
+  tags: string[];
+}
+```
+
+#### Product Structure
+```typescript
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  priceRange: '$' | '$$' | '$$$';
+  rating: number;
+  imageUrl?: string;
+  affiliateLink: string;
   relatedIdeaIds: string[];
   tags: string[];
 }

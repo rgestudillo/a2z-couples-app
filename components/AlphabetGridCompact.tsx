@@ -1,28 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { useDateIdeas } from '../context/DateIdeasContext';
+import { useIdeas, IdeaType } from '../context/IdeasContext';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const AlphabetGridCompact: React.FC = () => {
-    const { allIdeas } = useDateIdeas();
+    const { allIdeas, currentCategory } = useIdeas();
+    const ideas = allIdeas[currentCategory];
 
     const getIdeaCountForLetter = (letter: string): number => {
-        return allIdeas.filter(idea => idea.letter === letter).length;
+        return ideas.filter(idea => idea.letter === letter).length;
     };
 
     const handleLetterPress = (letter: string) => {
-        // Navigate to the letter screen
+        // Navigate to the letter screen with category
         try {
             router.push({
                 pathname: "/letter/[letter]",
-                params: { letter }
+                params: { letter, category: currentCategory }
             } as any);
         } catch (error) {
             console.error("Navigation error:", error);
             // Fallback navigation using string path
-            router.push(`/letter/${letter}` as any);
+            router.push(`/letter/${letter}?category=${currentCategory}` as any);
         }
     };
 

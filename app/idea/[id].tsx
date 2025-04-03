@@ -1,17 +1,104 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Linking } from 'react-native';
+import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useDateIdeas } from '../../context/DateIdeasContext';
+import { useIdeas, IdeaType, DateIdea, GiftIdea } from '../../context/IdeasContext';
 import { getBusinessesByIdeaId, Business } from '../../data/businesses';
 import BusinessCard from '../../components/BusinessCard';
 
-export default function IdeaDetailScreen() {
-    const { id } = useLocalSearchParams<{ id: string }>();
-    const { getIdeaById, favoriteIdeas, addToFavorites, removeFromFavorites } = useDateIdeas();
+// Mock product data - to be replaced with actual data file later
+const mockProducts = [
+    {
+        id: 'prod-1',
+        name: 'Apple Watch Series 7',
+        description: 'The latest Apple Watch with advanced health features',
+        price: 399.99,
+        priceRange: '$$$' as const,
+        rating: 4.8,
+        imageUrl: 'https://example.com/apple-watch.jpg',
+        affiliateLink: 'https://amazon.com/product/123',
+        relatedIdeaIds: ['gift-1'],
+        tags: ['Technology', 'Wearables']
+    },
+    {
+        id: 'prod-2',
+        name: 'Weighted Blanket',
+        description: 'Premium weighted blanket for better sleep and relaxation',
+        price: 89.99,
+        priceRange: '$$' as const,
+        rating: 4.6,
+        imageUrl: 'https://example.com/blanket.jpg',
+        affiliateLink: 'https://amazon.com/product/456',
+        relatedIdeaIds: ['gift-2'],
+        tags: ['Home', 'Comfort']
+    },
+    {
+        id: 'prod-3',
+        name: 'Gourmet Chocolate Box',
+        description: 'Assorted gourmet chocolates in an elegant gift box',
+        price: 45.99,
+        priceRange: '$$' as const,
+        rating: 4.5,
+        imageUrl: 'https://example.com/chocolate.jpg',
+        affiliateLink: 'https://amazon.com/product/789',
+        relatedIdeaIds: ['gift-3'],
+        tags: ['Food', 'Sweets']
+    }
+];
 
-    const idea = id ? getIdeaById(id) : undefined;
-    const relatedBusinesses = id ? getBusinessesByIdeaId(id) : [];
+// Helper function to get products by gift idea ID
+const getProductsByIdeaId = (ideaId: string) => {
+    return mockProducts.filter(product =>
+        product.relatedIdeaIds.includes(ideaId)
+    );
+};
+
+interface ProductCardProps {
+    product: typeof mockProducts[0];
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+    const handlePress = () => {
+        router.push({
+            pathname: "/product/[id]",
+            params: { id: product.id }
+        } as any);
+    };
+
+    return (
+        <TouchableOpacity style={styles.productCard} onPress={handlePress}>
+            <View style={styles.productHeader}>
+                <Text style={styles.productName}>{product.name}</Text>
+                <Text style={styles.productPrice}>${product.price}</Text>
+            </View>
+            <Text style={styles.productDescription} numberOfLines={2}>
+                {product.description}
+            </Text>
+            <View style={styles.productFooter}>
+                <View style={styles.ratingContainer}>
+                    <Ionicons name="star" size={16} color="#FFD700" />
+                    <Text style={styles.ratingText}>{product.rating}</Text>
+                </View>
+                <TouchableOpacity style={styles.shopButton}>
+                    <Text style={styles.shopButtonText}>View Details</Text>
+                </TouchableOpacity>
+            </View>
+        </TouchableOpacity>
+    );
+};
+
+export default function IdeaDetailScreen() {
+    const { id, type } = useLocalSearchParams<{ id: string, type: string }>();
+    const { getIdeaById, favoriteIdeas, addToFavorites, removeFromFavorites, currentCategory } = useIdeas();
+
+    // Use type from params or fall back to current category
+    const ideaType = (type || currentCategory) as IdeaType;
+
+    const idea = id ? getIdeaById(ideaType, id) : undefined;
+
+    // Get related items based on idea type
+    const relatedBusinesses = (ideaType === IdeaType.DATE && id) ? getBusinessesByIdeaId(id) : [];
+    const relatedProducts = (ideaType === IdeaType.GIFT && id) ? getProductsByIdeaId(id) : [];
 
     if (!idea) {
         return (
@@ -21,14 +108,65 @@ export default function IdeaDetailScreen() {
         );
     }
 
-    const isFavorite = favoriteIdeas.includes(idea.id);
+    const isFavorite = (favoriteIdeas[ideaType] || []).includes(idea.id);
 
     const handleFavoriteToggle = () => {
         if (isFavorite) {
-            removeFromFavorites(idea.id);
+            removeFromFavorites(ideaType, idea.id);
         } else {
-            addToFavorites(idea.id);
+            addToFavorites(ideaType, idea.id);
         }
+    };
+
+    // Render idea details based on type
+    const renderIdeaDetails = () => {
+        if (ideaType === IdeaType.DATE) {
+            const dateIdea = idea as DateIdea;
+            return (
+                <View style={styles.infoContainer}>
+                    <View style={styles.infoItem}>
+                        <Ionicons name="cash-outline" size={24} color="#666" />
+                        <Text style={styles.infoText}>
+                            <Text style={styles.infoLabel}>Cost: </Text>
+                            {dateIdea.cost}
+                        </Text>
+                    </View>
+
+                    <View style={styles.infoItem}>
+                        <Ionicons name="time-outline" size={24} color="#666" />
+                        <Text style={styles.infoText}>
+                            <Text style={styles.infoLabel}>Duration: </Text>
+                            {dateIdea.duration}
+                        </Text>
+                    </View>
+                </View>
+            );
+        } else if (ideaType === IdeaType.GIFT) {
+            const giftIdea = idea as GiftIdea;
+            return (
+                <View style={styles.infoContainer}>
+                    <View style={styles.infoItem}>
+                        <Ionicons name="cash-outline" size={24} color="#666" />
+                        <Text style={styles.infoText}>
+                            <Text style={styles.infoLabel}>Cost: </Text>
+                            {giftIdea.cost}
+                        </Text>
+                    </View>
+
+                    {giftIdea.occasion && giftIdea.occasion.length > 0 && (
+                        <View style={styles.infoItem}>
+                            <Ionicons name="gift-outline" size={24} color="#666" />
+                            <Text style={styles.infoText}>
+                                <Text style={styles.infoLabel}>Perfect for: </Text>
+                                {giftIdea.occasion.join(', ')}
+                            </Text>
+                        </View>
+                    )}
+                </View>
+            );
+        }
+
+        return null;
     };
 
     // Render the idea details as the header component of the FlatList
@@ -42,23 +180,7 @@ export default function IdeaDetailScreen() {
 
             <Text style={styles.description}>{idea.description}</Text>
 
-            <View style={styles.infoContainer}>
-                <View style={styles.infoItem}>
-                    <Ionicons name="cash-outline" size={24} color="#666" />
-                    <Text style={styles.infoText}>
-                        <Text style={styles.infoLabel}>Cost: </Text>
-                        {idea.cost}
-                    </Text>
-                </View>
-
-                <View style={styles.infoItem}>
-                    <Ionicons name="time-outline" size={24} color="#666" />
-                    <Text style={styles.infoText}>
-                        <Text style={styles.infoLabel}>Duration: </Text>
-                        {idea.duration}
-                    </Text>
-                </View>
-            </View>
+            {renderIdeaDetails()}
 
             <View style={styles.categoryContainer}>
                 <Text style={styles.categoryTitle}>Categories:</Text>
@@ -71,11 +193,20 @@ export default function IdeaDetailScreen() {
                 </View>
             </View>
 
-            {relatedBusinesses.length > 0 && (
-                <View style={styles.businessesSection}>
+            {ideaType === IdeaType.DATE && relatedBusinesses.length > 0 && (
+                <View style={styles.relatedSection}>
                     <Text style={styles.sectionTitle}>Related Businesses</Text>
                     <Text style={styles.sectionSubtitle}>
                         Perfect places to experience this date idea
+                    </Text>
+                </View>
+            )}
+
+            {ideaType === IdeaType.GIFT && relatedProducts.length > 0 && (
+                <View style={styles.relatedSection}>
+                    <Text style={styles.sectionTitle}>Shopping Options</Text>
+                    <Text style={styles.sectionSubtitle}>
+                        Where to buy this gift (affiliate links)
                     </Text>
                 </View>
             )}
@@ -103,7 +234,7 @@ export default function IdeaDetailScreen() {
             />
 
             <SafeAreaView style={styles.container}>
-                {relatedBusinesses.length > 0 ? (
+                {ideaType === IdeaType.DATE && relatedBusinesses.length > 0 ? (
                     <FlatList
                         data={relatedBusinesses}
                         keyExtractor={(item: Business) => item.id}
@@ -112,6 +243,16 @@ export default function IdeaDetailScreen() {
                                 key={item.id}
                                 business={item}
                             />
+                        )}
+                        ListHeaderComponent={renderHeader}
+                        contentContainerStyle={styles.content}
+                    />
+                ) : ideaType === IdeaType.GIFT && relatedProducts.length > 0 ? (
+                    <FlatList
+                        data={relatedProducts}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <ProductCard product={item} />
                         )}
                         ListHeaderComponent={renderHeader}
                         contentContainerStyle={styles.content}
@@ -231,7 +372,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#444',
     },
-    businessesSection: {
+    relatedSection: {
         marginBottom: 24,
     },
     sectionTitle: {
@@ -244,5 +385,66 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#666',
         marginBottom: 16,
+    },
+    productCard: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    productHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    productName: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+        flex: 1,
+        marginRight: 8,
+    },
+    productPrice: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#ff6b6b',
+    },
+    productDescription: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 12,
+        lineHeight: 20,
+    },
+    productFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    ratingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    ratingText: {
+        marginLeft: 4,
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+    },
+    shopButton: {
+        backgroundColor: '#5a67d8',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+    },
+    shopButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 12,
     },
 }); 

@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { DateIdeasProvider } from '../context/DateIdeasContext';
+import { IdeasProvider } from '../context/IdeasContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -29,16 +29,18 @@ export default function RootLayout() {
   }
 
   return (
-    <DateIdeasProvider>
+    <IdeasProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="letter/[letter]" options={{ title: "Letter Ideas" }} />
-          <Stack.Screen name="idea/[id]" options={{ title: "Date Idea" }} />
+          <Stack.Screen name="idea/[id]" options={{ title: "Idea Details" }} />
+          <Stack.Screen name="business/[id]" options={{ title: "Business Details" }} />
+          <Stack.Screen name="product/[id]" options={{ title: "Product Details" }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
-    </DateIdeasProvider>
+    </IdeasProvider>
   );
 }

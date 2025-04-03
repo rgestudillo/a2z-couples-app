@@ -9,124 +9,116 @@ import {
   TouchableOpacity,
   Image
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import AlphabetGridCompact from '../../components/AlphabetGridCompact';
 import IdeaCard from '../../components/IdeaCard';
-import { useDateIdeas } from '../../context/DateIdeasContext';
-import { DateIdea } from '../../data/dateIdeas';
+import { useIdeas, IdeaType } from '../../context/IdeasContext';
+import { BaseIdea } from '../../context/IdeasContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import CategorySelector from '../../components/CategorySelector';
+import IdentificationCard from '../../components/IdentificationCard';
 
 export default function HomeScreen() {
-  const { allIdeas } = useDateIdeas();
+  const { allIdeas, currentCategory } = useIdeas();
+  const ideas = allIdeas[currentCategory];
 
-  // Get 5 random date ideas to feature
+  // Get 2 random ideas to feature from the current category
   const getRandomIdeas = (count: number) => {
-    const shuffled = [...allIdeas].sort(() => 0.5 - Math.random());
+    const shuffled = [...ideas].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   };
 
-  const featuredIdeas = getRandomIdeas(5);
+  const featuredIdeas = getRandomIdeas(2);
 
   // Navigate to letters tab
   const handleBrowseAllPress = () => {
     router.push('/(tabs)/letters' as any);
   };
 
-  // Navigate to businesses page
-  const handleExploreBusinessesPress = () => {
-    router.push('/(tabs)/businesses' as any);
+  // Navigate to browse tab
+  const handleBrowsePress = () => {
+    router.push('/(tabs)/browse' as any);
   };
 
   // Render header section with the alphabet grid
   const renderHeader = () => (
     <>
-      {/* Hero Section with Gradient */}
-      <LinearGradient
-        colors={['#ff6b6b', '#ff8e8e']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.heroSection}
-      >
-        <View style={styles.headerContainer}>
-          <Text style={styles.header}>Find Your Next Date</Text>
-          <Text style={styles.subheader}>Browse ideas from A to Z and discover local date spots</Text>
-        </View>
-      </LinearGradient>
+      {/* Identification Card */}
+      <View style={styles.idCardContainer}>
+        <IdentificationCard />
+      </View>
 
-      {/* Quick Actions */}
+      {/* Category Selector with simplified design */}
+      <CategorySelector />
+
+      {/* Quick Action Buttons in cute card style */}
       <View style={styles.quickActionsContainer}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={styles.actionCard}
           onPress={handleBrowseAllPress}
         >
           <View style={styles.actionIconContainer}>
-            <Ionicons name="grid-outline" size={24} color="#fff" />
+            <Ionicons name="grid-outline" size={28} color="#FF6B81" />
           </View>
-          <Text style={styles.actionText}>All Letters</Text>
+          <Text style={styles.actionTitle}>A to Z</Text>
+          <Text style={styles.actionSubtitle}>Browse all ideas</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.actionButton}
-          onPress={handleExploreBusinessesPress}
+          style={styles.actionCard}
+          onPress={handleBrowsePress}
         >
-          <View style={[styles.actionIconContainer, { backgroundColor: '#5a67d8' }]}>
-            <Ionicons name="business-outline" size={24} color="#fff" />
+          <View style={styles.actionIconContainer}>
+            <Ionicons
+              name={currentCategory === IdeaType.DATE ? "business-outline" : "pricetag-outline"}
+              size={28}
+              color="#FF6B81"
+            />
           </View>
-          <Text style={styles.actionText}>Date Spots</Text>
+          <Text style={styles.actionTitle}>
+            {currentCategory === IdeaType.DATE ? "Places" : "Gifts"}
+          </Text>
+          <Text style={styles.actionSubtitle}>
+            {currentCategory === IdeaType.DATE ? "Find date spots" : "Shop gifts"}
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Browse by Letter Section */}
-      <View style={styles.sectionContainer}>
-        <View style={styles.sectionHeaderRow}>
-          <View>
-            <Text style={styles.sectionTitle}>Popular Letters</Text>
-            <Text style={styles.sectionDescription}>
-              Quick access to date ideas
-            </Text>
-          </View>
-          <TouchableOpacity onPress={handleBrowseAllPress}>
-            <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
-        </View>
-        <AlphabetGridCompact />
-      </View>
-
-      <View style={styles.divider} />
-
       {/* Featured Ideas Section */}
       <View style={styles.featuredContainer}>
-        <View style={styles.sectionHeaderRow}>
-          <View style={styles.featuredTitleContainer}>
-            <Ionicons name="star" size={24} color="#ff6b6b" />
-            <Text style={styles.featuredTitle}>Featured Ideas</Text>
+        <View style={styles.sectionTitleRow}>
+          <View style={styles.sectionTitleContainer}>
+            <Ionicons name="heart" size={20} color="#FF6B81" />
+            <Text style={styles.sectionTitle}>For You</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/letters' as any)}>
-            <Text style={styles.viewAllText}>More Ideas</Text>
+          <TouchableOpacity onPress={handleBrowseAllPress}>
+            <Text style={styles.viewAllText}>See All</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.featuredSubtitle}>
-          Feeling spontaneous? Try one of these
-        </Text>
       </View>
     </>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <FlatList
         data={featuredIdeas}
-        keyExtractor={(item: DateIdea) => item.id}
+        keyExtractor={(item: BaseIdea) => item.id}
         renderItem={({ item }) => (
           <View style={styles.cardWrapper}>
-            <IdeaCard idea={item} />
+            <IdeaCard idea={item} type={currentCategory} />
           </View>
         )}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Ionicons name="heart-outline" size={60} color="#ffb8c6" />
+            <Text style={styles.emptyText}>No ideas yet</Text>
+          </View>
+        }
       />
     </SafeAreaView>
   );
@@ -135,126 +127,92 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#FFF8F9', // Soft pink background
   },
   listContent: {
     paddingBottom: 32,
   },
-  heroSection: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  headerContainer: {
-    marginBottom: 8,
-  },
-  header: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#fff',
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.15)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
-  },
-  subheader: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.95)',
-    lineHeight: 22,
-    textShadowColor: 'rgba(0, 0, 0, 0.1)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+  idCardContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   quickActionsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: -30,
-    marginHorizontal: 20,
-    marginBottom: 24,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
-  actionButton: {
+  actionCard: {
+    width: '48%',
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 16,
     alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 100,
+    shadowColor: '#ffb8c6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   actionIconContainer: {
-    backgroundColor: '#ff6b6b',
     width: 56,
     height: 56,
     borderRadius: 28,
+    backgroundColor: '#FFF0F3',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    marginBottom: 12,
   },
-  actionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#444',
-  },
-  sectionContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  sectionTitle: {
-    fontSize: 20,
+  actionTitle: {
+    fontSize: 16,
     fontWeight: '700',
-    color: '#333',
+    color: '#444',
     marginBottom: 4,
   },
-  sectionDescription: {
-    fontSize: 14,
-    color: '#777',
-  },
-  viewAllText: {
-    color: '#ff6b6b',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  divider: {
-    height: 8,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 16,
+  actionSubtitle: {
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'center',
   },
   featuredContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    marginBottom: 8,
   },
-  featuredTitleContainer: {
+  sectionTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  featuredTitle: {
-    fontSize: 20,
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: '700',
-    color: '#333',
+    color: '#444',
     marginLeft: 8,
   },
-  featuredSubtitle: {
+  viewAllText: {
+    color: '#FF6B81',
+    fontWeight: '600',
     fontSize: 14,
-    color: '#777',
-    marginTop: 4,
-    marginBottom: 16,
   },
   cardWrapper: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     marginBottom: 16,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
+    marginTop: 12,
   },
 });

@@ -1,14 +1,17 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, FlatList, SafeAreaView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import IdeaCard from '../../components/IdeaCard';
-import { useDateIdeas } from '../../context/DateIdeasContext';
+import { useIdeas, IdeaType } from '../../context/IdeasContext';
 
 export default function LetterIdeasScreen() {
-    const { letter } = useLocalSearchParams<{ letter: string }>();
-    const { getIdeasByLetter } = useDateIdeas();
+    const { letter, category } = useLocalSearchParams<{ letter: string, category: string }>();
+    const { getIdeasByLetter, currentCategory } = useIdeas();
 
-    const ideas = letter ? getIdeasByLetter(letter) : [];
+    // Use the category from params or fall back to current category
+    const ideaType = category ? category as IdeaType : currentCategory;
+
+    const ideas = letter ? getIdeasByLetter(ideaType, letter) : [];
 
     return (
         <SafeAreaView style={styles.container}>
@@ -23,7 +26,7 @@ export default function LetterIdeasScreen() {
             <FlatList
                 data={ideas}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <IdeaCard idea={item} />}
+                renderItem={({ item }) => <IdeaCard idea={item} type={ideaType} />}
                 contentContainerStyle={styles.listContent}
             />
         </SafeAreaView>

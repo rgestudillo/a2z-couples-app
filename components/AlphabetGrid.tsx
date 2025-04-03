@@ -1,52 +1,61 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { router } from 'expo-router';
-import { useDateIdeas } from '../context/DateIdeasContext';
+import { useIdeas, IdeaType } from '../context/IdeasContext';
+import { Ionicons } from '@expo/vector-icons';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const AlphabetGrid: React.FC = () => {
-    const { allIdeas } = useDateIdeas();
+    const { allIdeas, currentCategory } = useIdeas();
+    const ideas = allIdeas[currentCategory];
 
     const getIdeaCountForLetter = (letter: string): number => {
-        return allIdeas.filter(idea => idea.letter === letter).length;
+        return ideas.filter(idea => idea.letter === letter).length;
     };
 
     const handleLetterPress = (letter: string) => {
-        // Navigate to the letter screen
+        // Navigate to the letter screen with category
         try {
             router.push({
                 pathname: "/letter/[letter]",
-                params: { letter }
+                params: { letter, category: currentCategory }
             } as any);
         } catch (error) {
             console.error("Navigation error:", error);
             // Fallback navigation using string path
-            router.push(`/letter/${letter}`);
+            router.push(`/letter/${letter}?category=${currentCategory}` as any);
         }
+    };
+
+    const getLetterColor = () => {
+        return currentCategory === IdeaType.DATE ? '#FF6B81' : '#7986CB';
     };
 
     const renderItem = ({ item: letter }: { item: string }) => {
         const count = getIdeaCountForLetter(letter);
         const hasIdeas = count > 0;
+        const themeColor = getLetterColor();
 
         return (
             <TouchableOpacity
                 style={[
                     styles.letterBox,
-                    hasIdeas ? styles.hasIdeas : styles.noIdeas,
+                    hasIdeas ? [styles.hasIdeas, { borderColor: themeColor }] : styles.noIdeas,
                 ]}
                 onPress={() => handleLetterPress(letter)}
                 disabled={!hasIdeas}
             >
                 <Text style={[
                     styles.letter,
-                    hasIdeas ? styles.letterActive : styles.letterInactive
+                    hasIdeas ? [styles.letterActive, { color: themeColor }] : styles.letterInactive
                 ]}>
                     {letter}
                 </Text>
                 {hasIdeas && (
-                    <Text style={styles.count}>{count}</Text>
+                    <View style={[styles.countBadge, { backgroundColor: themeColor }]}>
+                        <Text style={styles.count}>{count}</Text>
+                    </View>
                 )}
             </TouchableOpacity>
         );
@@ -54,6 +63,16 @@ const AlphabetGrid: React.FC = () => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.header}>
+                <Ionicons
+                    name={currentCategory === IdeaType.DATE ? "heart-circle" : "gift"}
+                    size={24}
+                    color={getLetterColor()}
+                />
+                <Text style={[styles.headerText, { color: getLetterColor() }]}>
+                    Browse {currentCategory === IdeaType.DATE ? "Date" : "Gift"} Ideas
+                </Text>
+            </View>
             <FlatList
                 data={ALPHABET}
                 renderItem={renderItem}
@@ -69,44 +88,81 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
+        backgroundColor: '#FFF8F9',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
+        paddingVertical: 10,
+        backgroundColor: 'white',
+        borderRadius: 16,
+        shadowColor: '#ffb8c6',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    headerText: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginLeft: 10,
     },
     grid: {
         paddingVertical: 8,
         alignItems: 'center',
     },
     letterBox: {
-        width: 80,
-        height: 80,
-        margin: 8,
-        borderRadius: 12,
+        width: 75,
+        height: 75,
+        margin: 6,
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
+        shadowColor: '#ffb8c6',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 3,
+        shadowRadius: 4,
         elevation: 2,
+        position: 'relative',
     },
     hasIdeas: {
         backgroundColor: '#ffffff',
+        borderWidth: 2,
+        borderColor: '#FF6B81',
     },
     noIdeas: {
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#f8f8f8',
+        borderWidth: 2,
+        borderColor: '#f0f0f0',
     },
     letter: {
-        fontSize: 28,
+        fontSize: 26,
         fontWeight: '700',
     },
     letterActive: {
         color: '#333',
     },
     letterInactive: {
-        color: '#aaa',
+        color: '#ccc',
+    },
+    countBadge: {
+        position: 'absolute',
+        top: -5,
+        right: -5,
+        backgroundColor: '#FF6B81',
+        borderRadius: 10,
+        minWidth: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
     },
     count: {
-        fontSize: 14,
-        color: '#666',
-        marginTop: 4,
+        fontSize: 12,
+        color: 'white',
+        fontWeight: '600',
     },
 });
 
