@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import dateIdeas, { DateIdea as OriginalDateIdea } from '../data/dateIdeas';
+import { Business } from '../data/businesses';
 
 // Re-export the DateIdea interface
 export type DateIdea = OriginalDateIdea;
@@ -78,6 +79,14 @@ interface IdeasContextType {
     getIdeasByLetter: (type: IdeaType, letter: string) => (DateIdea | GiftIdea)[];
     getIdeaById: (type: IdeaType, id: string) => (DateIdea | GiftIdea) | undefined;
     getFavoriteIdeas: (type: IdeaType) => (DateIdea | GiftIdea)[];
+    completedIdeas: { [key: string]: string[] };
+    completedBusinesses: string[];
+    markIdeaAsCompleted: (type: IdeaType, id: string) => void;
+    markIdeaAsIncomplete: (type: IdeaType, id: string) => void;
+    markBusinessAsCompleted: (businessId: string) => void;
+    markBusinessAsIncomplete: (businessId: string) => void;
+    isIdeaCompleted: (type: IdeaType, id: string) => boolean;
+    isBusinessCompleted: (businessId: string) => boolean;
 }
 
 const IdeasContext = createContext<IdeasContextType | undefined>(undefined);
@@ -88,6 +97,11 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         [IdeaType.DATE]: [],
         [IdeaType.GIFT]: []
     });
+    const [completedIdeas, setCompletedIdeas] = useState<{ [key: string]: string[] }>({
+        [IdeaType.DATE]: [],
+        [IdeaType.GIFT]: []
+    });
+    const [completedBusinesses, setCompletedBusinesses] = useState<string[]>([]);
 
     // Debug: Log current category state
     useEffect(() => {
@@ -116,6 +130,27 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         loadFavorites();
     }, []);
 
+    // Load completed items from AsyncStorage
+    useEffect(() => {
+        const loadCompletedItems = async () => {
+            try {
+                const storedCompletedIdeas = await AsyncStorage.getItem('completedIdeas');
+                if (storedCompletedIdeas) {
+                    setCompletedIdeas(JSON.parse(storedCompletedIdeas));
+                }
+
+                const storedCompletedBusinesses = await AsyncStorage.getItem('completedBusinesses');
+                if (storedCompletedBusinesses) {
+                    setCompletedBusinesses(JSON.parse(storedCompletedBusinesses));
+                }
+            } catch (error) {
+                console.error('Error loading completed items:', error);
+            }
+        };
+
+        loadCompletedItems();
+    }, []);
+
     // Save favorites to AsyncStorage whenever it changes
     useEffect(() => {
         const saveFavorites = async () => {
@@ -128,6 +163,20 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         saveFavorites();
     }, [favoriteIdeas]);
+
+    // Save completed items to AsyncStorage whenever they change
+    useEffect(() => {
+        const saveCompletedItems = async () => {
+            try {
+                await AsyncStorage.setItem('completedIdeas', JSON.stringify(completedIdeas));
+                await AsyncStorage.setItem('completedBusinesses', JSON.stringify(completedBusinesses));
+            } catch (error) {
+                console.error('Error saving completed items:', error);
+            }
+        };
+
+        saveCompletedItems();
+    }, [completedIdeas, completedBusinesses]);
 
     const addToFavorites = useCallback((type: IdeaType, id: string) => {
         setFavoriteIdeas((prev) => {
@@ -148,6 +197,85 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             [type]: (prev[type] || []).filter((favId) => favId !== id)
         }));
     }, []);
+
+    const markIdeaAsCompleted = useCallback((type: IdeaType, id: string) => {
+        setCompletedIdeas((prev) => {
+            const currentCompleted = prev[type] || [];
+            if (!currentCompleted.includes(id)) {
+                return {
+                    ...prev,
+                    [type]: [...currentCompleted, id]
+                };
+            }
+            return prev;
+        });
+    }, []);
+
+    const markIdeaAsIncomplete = useCallback((type: IdeaType, id: string) => {
+        setCompletedIdeas((prev) => ({
+            ...prev,
+            [type]: (prev[type] || []).filter((ideaId) => ideaId !== id)
+        }));
+    }, []);
+
+    const markBusinessAsCompleted = useCallback((businessId: string) => {
+        // First, add the business to completed businesses
+        setCompletedBusinesses((prev) => {
+            if (!prev.includes(businessId)) {
+                return [...prev, businessId];
+            }
+            return prev;
+        });
+
+        // Import needed function from businesses module
+        const { getBusinessById } = require('../data/businesses');
+
+        // Get the business details to find its related idea
+        const business = getBusinessById(businessId);
+        if (business && business.relatedIdeaIds.length > 0) {
+            const ideaId = business.relatedIdeaIds[0]; // Take the first related idea
+
+            // Mark the parent idea as completed as soon as at least one business is completed
+            markIdeaAsCompleted(IdeaType.DATE, ideaId);
+        }
+    }, [completedBusinesses, markIdeaAsCompleted]);
+
+    const markBusinessAsIncomplete = useCallback((businessId: string) => {
+        // First remove the business from completed businesses
+        setCompletedBusinesses((prev) =>
+            prev.filter((id) => id !== businessId)
+        );
+
+        // Import needed functions from businesses module
+        const { getBusinessById, getBusinessesByIdeaId } = require('../data/businesses');
+
+        // Get the business details to find its related idea
+        const business = getBusinessById(businessId);
+        if (business && business.relatedIdeaIds.length > 0) {
+            const ideaId = business.relatedIdeaIds[0]; // Take the first related idea
+
+            // Get all businesses related to this idea
+            const relatedBusinesses = getBusinessesByIdeaId(ideaId);
+
+            // Check if there are still other completed businesses for this idea
+            const hasCompletedBusinesses = relatedBusinesses.some(
+                (b: Business) => b.id !== businessId && completedBusinesses.includes(b.id)
+            );
+
+            // If no other businesses are completed, mark the parent idea as incomplete
+            if (!hasCompletedBusinesses) {
+                markIdeaAsIncomplete(IdeaType.DATE, ideaId);
+            }
+        }
+    }, [completedBusinesses, markIdeaAsIncomplete]);
+
+    const isIdeaCompleted = useCallback((type: IdeaType, id: string) => {
+        return (completedIdeas[type] || []).includes(id);
+    }, [completedIdeas]);
+
+    const isBusinessCompleted = useCallback((businessId: string) => {
+        return completedBusinesses.includes(businessId);
+    }, [completedBusinesses]);
 
     const getIdeasByLetter = useCallback((type: IdeaType, letter: string) => {
         const ideas = type === IdeaType.DATE ? dateIdeas : giftIdeas;
@@ -180,6 +308,14 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         getIdeasByLetter,
         getIdeaById,
         getFavoriteIdeas,
+        completedIdeas,
+        completedBusinesses,
+        markIdeaAsCompleted,
+        markIdeaAsIncomplete,
+        markBusinessAsCompleted,
+        markBusinessAsIncomplete,
+        isIdeaCompleted,
+        isBusinessCompleted,
     };
 
     return (

@@ -55,13 +55,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="favorites"
+        name="wrapped"
         options={{
-          title: 'Favorites',
+          title: 'Wrapped',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart" size={size} color={color} />
+            <Ionicons name="albums" size={size} color={color} />
           ),
-          headerTitle: 'Your Favorites',
+          headerTitle: 'Your Ideas Wrapped',
         }}
       />
     </Tabs>

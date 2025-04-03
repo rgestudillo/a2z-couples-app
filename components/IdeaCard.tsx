@@ -11,8 +11,9 @@ interface IdeaCardProps {
 }
 
 const IdeaCard: React.FC<IdeaCardProps> = ({ idea, type, compact = false }) => {
-    const { favoriteIdeas, addToFavorites, removeFromFavorites } = useIdeas();
+    const { favoriteIdeas, addToFavorites, removeFromFavorites, isIdeaCompleted } = useIdeas();
     const isFavorite = (favoriteIdeas[type] || []).includes(idea.id);
+    const isCompleted = isIdeaCompleted(type, idea.id);
 
     const handleFavoriteToggle = () => {
         if (isFavorite) {
@@ -88,6 +89,13 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, type, compact = false }) => {
                         <Text style={[styles.tagText, { color: themeColor }]}>{idea.category[0]}</Text>
                     </View>
                 )}
+
+                {isCompleted && (
+                    <View style={[styles.completedTag, { backgroundColor: '#4CAF5022' }]}>
+                        <Ionicons name="checkmark-circle" size={12} color="#4CAF50" style={styles.completedIcon} />
+                        <Text style={[styles.tagText, { color: '#4CAF50' }]}>Completed</Text>
+                    </View>
+                )}
             </View>
         );
     };
@@ -98,7 +106,8 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, type, compact = false }) => {
                 styles.card,
                 compact ? styles.compactCard : null,
                 pressed ? styles.pressed : null,
-                { borderColor: getThemeColor() }
+                { borderColor: getThemeColor() },
+                isCompleted ? styles.completedCard : null
             ]}
             onPress={handlePress}
         >
@@ -110,6 +119,9 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea, type, compact = false }) => {
                 <View style={styles.titleContainer}>
                     <Ionicons name={getCategoryIcon()} size={18} color={getThemeColor()} style={styles.categoryIcon} />
                     <Text style={styles.title}>{idea.title}</Text>
+                    {isCompleted && (
+                        <Ionicons name="checkmark-circle" size={18} color="#4CAF50" style={styles.completedStatusIcon} />
+                    )}
                 </View>
                 <TouchableOpacity
                     onPress={handleFavoriteToggle}
@@ -153,6 +165,9 @@ const styles = StyleSheet.create({
         padding: 12,
         marginBottom: 8,
     },
+    completedCard: {
+        backgroundColor: '#f9fff9',
+    },
     pressed: {
         opacity: 0.9,
         transform: [{ scale: 0.99 }],
@@ -192,6 +207,9 @@ const styles = StyleSheet.create({
     categoryIcon: {
         marginRight: 8,
     },
+    completedStatusIcon: {
+        marginLeft: 8,
+    },
     title: {
         fontSize: 18,
         fontWeight: '600',
@@ -219,6 +237,18 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         marginRight: 8,
         marginBottom: 4,
+    },
+    completedTag: {
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 12,
+        marginRight: 8,
+        marginBottom: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    completedIcon: {
+        marginRight: 4,
     },
     tagText: {
         fontSize: 12,

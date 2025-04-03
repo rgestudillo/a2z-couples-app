@@ -2,15 +2,23 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useIdeas, IdeaType } from '../context/IdeasContext';
+import { Ionicons } from '@expo/vector-icons';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const AlphabetGridCompact: React.FC = () => {
-    const { allIdeas, currentCategory } = useIdeas();
+    const { allIdeas, currentCategory, completedIdeas } = useIdeas();
     const ideas = allIdeas[currentCategory];
 
     const getIdeaCountForLetter = (letter: string): number => {
         return ideas.filter(idea => idea.letter === letter).length;
+    };
+
+    const hasCompletedIdeasForLetter = (letter: string): boolean => {
+        const ideasForLetter = ideas.filter(idea => idea.letter === letter);
+        return ideasForLetter.some(idea =>
+            (completedIdeas[currentCategory] || []).includes(idea.id)
+        );
     };
 
     const handleLetterPress = (letter: string) => {
@@ -39,14 +47,31 @@ const AlphabetGridCompact: React.FC = () => {
             >
                 {lettersWithIdeas.map((letter) => {
                     const count = getIdeaCountForLetter(letter);
+                    const hasCompleted = hasCompletedIdeasForLetter(letter);
                     return (
                         <TouchableOpacity
                             key={letter}
-                            style={styles.letterBox}
+                            style={[
+                                styles.letterBox,
+                                hasCompleted && styles.completedLetterBox
+                            ]}
                             onPress={() => handleLetterPress(letter)}
                         >
-                            <Text style={styles.letter}>{letter}</Text>
-                            <View style={styles.countBadge}>
+                            {hasCompleted && (
+                                <View style={styles.completedCheck}>
+                                    <Ionicons name="checkmark-circle" size={14} color="#4CAF50" />
+                                </View>
+                            )}
+                            <Text style={[
+                                styles.letter,
+                                hasCompleted && styles.completedLetter
+                            ]}>
+                                {letter}
+                            </Text>
+                            <View style={[
+                                styles.countBadge,
+                                hasCompleted && styles.completedCountBadge
+                            ]}>
                                 <Text style={styles.count}>{count}</Text>
                             </View>
                         </TouchableOpacity>
@@ -78,11 +103,25 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
         elevation: 2,
         position: 'relative',
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    completedLetterBox: {
+        backgroundColor: '#F1F8E9',
+        borderColor: '#4CAF50',
+    },
+    completedCheck: {
+        position: 'absolute',
+        top: 8,
+        left: 8,
     },
     letter: {
         fontSize: 24,
         fontWeight: '700',
         color: '#333',
+    },
+    completedLetter: {
+        color: '#4CAF50',
     },
     countBadge: {
         position: 'absolute',
@@ -94,6 +133,9 @@ const styles = StyleSheet.create({
         height: 20,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    completedCountBadge: {
+        backgroundColor: '#4CAF50',
     },
     count: {
         fontSize: 12,

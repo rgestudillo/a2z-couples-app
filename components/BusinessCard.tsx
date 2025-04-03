@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Business } from '../data/businesses';
+import { useIdeas } from '../context/IdeasContext';
 
 interface BusinessCardProps {
     business: Business;
@@ -10,6 +11,9 @@ interface BusinessCardProps {
 }
 
 const BusinessCard: React.FC<BusinessCardProps> = ({ business, compact = false }) => {
+    const { isBusinessCompleted, markBusinessAsCompleted, markBusinessAsIncomplete } = useIdeas();
+    const isCompleted = isBusinessCompleted(business.id);
+
     const handlePress = () => {
         // Navigate to the business detail screen
         try {
@@ -21,6 +25,14 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, compact = false }
             console.error("Navigation error:", error);
             // Fallback navigation using string path
             router.push(`/business/${business.id}` as any);
+        }
+    };
+
+    const toggleCompleted = () => {
+        if (isCompleted) {
+            markBusinessAsIncomplete(business.id);
+        } else {
+            markBusinessAsCompleted(business.id);
         }
     };
 
@@ -49,12 +61,18 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, compact = false }
             style={({ pressed }) => [
                 styles.card,
                 compact ? styles.compactCard : null,
-                pressed ? styles.pressed : null
+                pressed ? styles.pressed : null,
+                isCompleted ? styles.completedCard : null
             ]}
             onPress={handlePress}
         >
             <View style={styles.header}>
-                <Text style={styles.title}>{business.name}</Text>
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>{business.name}</Text>
+                    {isCompleted && (
+                        <Ionicons name="checkmark-circle" size={18} color="#4CAF50" style={styles.completedStatusIcon} />
+                    )}
+                </View>
                 <Text style={styles.priceRange}>{business.priceRange}</Text>
             </View>
 
@@ -79,6 +97,26 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, compact = false }
                         <Text style={styles.tagText}>{tag}</Text>
                     </View>
                 ))}
+
+                <TouchableOpacity
+                    style={[
+                        styles.completedButton,
+                        isCompleted ? styles.completedButtonActive : styles.completedButtonInactive
+                    ]}
+                    onPress={toggleCompleted}
+                >
+                    <Ionicons
+                        name={isCompleted ? "checkmark-circle" : "checkmark-circle-outline"}
+                        size={14}
+                        color={isCompleted ? "#FFFFFF" : "#4CAF50"}
+                    />
+                    <Text style={[
+                        styles.completedButtonText,
+                        isCompleted ? styles.completedButtonTextActive : styles.completedButtonTextInactive
+                    ]}>
+                        {isCompleted ? "Completed" : "Mark Done"}
+                    </Text>
+                </TouchableOpacity>
             </View>
         </Pressable>
     );
@@ -100,6 +138,11 @@ const styles = StyleSheet.create({
         padding: 12,
         marginBottom: 8,
     },
+    completedCard: {
+        backgroundColor: '#f9fff9',
+        borderLeftWidth: 4,
+        borderLeftColor: '#4CAF50',
+    },
     pressed: {
         opacity: 0.8,
         backgroundColor: '#f8f8f8',
@@ -110,11 +153,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 4,
     },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
     title: {
         fontSize: 18,
         fontWeight: '600',
         color: '#333',
         flex: 1,
+    },
+    completedStatusIcon: {
+        marginLeft: 8,
     },
     priceRange: {
         fontSize: 16,
@@ -150,7 +201,9 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         marginTop: 4,
+        alignItems: 'center',
     },
     tag: {
         backgroundColor: '#f0f0f0',
@@ -158,10 +211,38 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         borderRadius: 4,
         marginRight: 8,
+        marginBottom: 4,
     },
     tagText: {
         fontSize: 12,
         color: '#666',
+    },
+    completedButton: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 4,
+        marginLeft: 'auto',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    completedButtonActive: {
+        backgroundColor: '#4CAF50',
+    },
+    completedButtonInactive: {
+        backgroundColor: '#E8F5E9',
+        borderWidth: 1,
+        borderColor: '#4CAF50',
+    },
+    completedButtonText: {
+        fontSize: 12,
+        marginLeft: 4,
+    },
+    completedButtonTextActive: {
+        color: '#FFFFFF',
+    },
+    completedButtonTextInactive: {
+        color: '#4CAF50',
     },
 });
 

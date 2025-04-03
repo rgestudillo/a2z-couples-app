@@ -7,11 +7,18 @@ import { Ionicons } from '@expo/vector-icons';
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const AlphabetGrid: React.FC = () => {
-    const { allIdeas, currentCategory } = useIdeas();
+    const { allIdeas, currentCategory, completedIdeas } = useIdeas();
     const ideas = allIdeas[currentCategory];
 
     const getIdeaCountForLetter = (letter: string): number => {
         return ideas.filter(idea => idea.letter === letter).length;
+    };
+
+    const hasCompletedIdeasForLetter = (letter: string): boolean => {
+        const ideasForLetter = ideas.filter(idea => idea.letter === letter);
+        return ideasForLetter.some(idea =>
+            (completedIdeas[currentCategory] || []).includes(idea.id)
+        );
     };
 
     const handleLetterPress = (letter: string) => {
@@ -35,6 +42,7 @@ const AlphabetGrid: React.FC = () => {
     const renderItem = ({ item: letter }: { item: string }) => {
         const count = getIdeaCountForLetter(letter);
         const hasIdeas = count > 0;
+        const hasCompleted = hasCompletedIdeasForLetter(letter);
         const themeColor = getLetterColor();
 
         return (
@@ -42,18 +50,28 @@ const AlphabetGrid: React.FC = () => {
                 style={[
                     styles.letterBox,
                     hasIdeas ? [styles.hasIdeas, { borderColor: themeColor }] : styles.noIdeas,
+                    hasCompleted && styles.completedLetterBox
                 ]}
                 onPress={() => handleLetterPress(letter)}
                 disabled={!hasIdeas}
             >
+                {hasCompleted && (
+                    <View style={styles.completedCheck}>
+                        <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                    </View>
+                )}
                 <Text style={[
                     styles.letter,
-                    hasIdeas ? [styles.letterActive, { color: themeColor }] : styles.letterInactive
+                    hasIdeas ? [styles.letterActive, { color: themeColor }] : styles.letterInactive,
+                    hasCompleted && styles.completedLetter
                 ]}>
                     {letter}
                 </Text>
                 {hasIdeas && (
-                    <View style={[styles.countBadge, { backgroundColor: themeColor }]}>
+                    <View style={[
+                        styles.countBadge,
+                        { backgroundColor: hasCompleted ? '#4CAF50' : themeColor }
+                    ]}>
                         <Text style={styles.count}>{count}</Text>
                     </View>
                 )}
@@ -73,6 +91,7 @@ const AlphabetGrid: React.FC = () => {
                     Browse {currentCategory === IdeaType.DATE ? "Date" : "Gift"} Ideas
                 </Text>
             </View>
+
             <FlatList
                 data={ALPHABET}
                 renderItem={renderItem}
@@ -109,6 +128,34 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginLeft: 10,
     },
+    legend: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginBottom: 16,
+        backgroundColor: 'white',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 10,
+    },
+    legendColorBox: {
+        width: 12,
+        height: 12,
+        borderRadius: 3,
+        backgroundColor: '#FF6B81',
+        marginRight: 5,
+    },
+    legendCompleted: {
+        backgroundColor: '#4CAF50',
+    },
+    legendText: {
+        fontSize: 12,
+        color: '#666',
+    },
     grid: {
         paddingVertical: 8,
         alignItems: 'center',
@@ -126,6 +173,15 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 2,
         position: 'relative',
+    },
+    completedLetterBox: {
+        backgroundColor: '#F1F8E9', // Light green background
+        borderColor: '#4CAF50', // Green border
+    },
+    completedCheck: {
+        position: 'absolute',
+        top: 8,
+        left: 8,
     },
     hasIdeas: {
         backgroundColor: '#ffffff',
@@ -146,6 +202,9 @@ const styles = StyleSheet.create({
     },
     letterInactive: {
         color: '#ccc',
+    },
+    completedLetter: {
+        color: '#4CAF50',
     },
     countBadge: {
         position: 'absolute',
