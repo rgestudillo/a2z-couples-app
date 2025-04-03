@@ -1,10 +1,9 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import dateIdeas, { DateIdea as OriginalDateIdea } from '../data/dateIdeas';
+import dateIdeas, { DateIdea } from '../data/dateIdeas';
+import giftIdeas, { GiftIdea } from '../data/giftIdeas';
 import { Business } from '../data/businesses';
-
-// Re-export the DateIdea interface
-export type DateIdea = OriginalDateIdea;
+import products from '../data/products';
 
 // Base idea interface that all idea types will extend
 export interface BaseIdea {
@@ -17,54 +16,11 @@ export interface BaseIdea {
     image?: string;
 }
 
-// Gift idea interface
-export interface GiftIdea extends BaseIdea {
-    occasion: string[];
-    relatedProductIds: string[];
-}
-
 // Enum for idea types
 export enum IdeaType {
     DATE = 'date',
     GIFT = 'gift'
 }
-
-// Mock gift ideas data - to be replaced with actual data file later
-const giftIdeas: GiftIdea[] = [
-    {
-        id: 'gift-1',
-        title: 'Apple Watch',
-        letter: 'A',
-        description: 'A premium smartwatch that makes a perfect gift for tech lovers.',
-        cost: '$$$',
-        category: ['Technology', 'Wearables'],
-        occasion: ['Birthday', 'Anniversary'],
-        relatedProductIds: [],
-        image: 'https://example.com/apple-watch.jpg'
-    },
-    {
-        id: 'gift-2',
-        title: 'Blanket',
-        letter: 'B',
-        description: 'A cozy weighted blanket for comfort and relaxation.',
-        cost: '$$',
-        category: ['Home', 'Comfort'],
-        occasion: ['Christmas', 'Housewarming'],
-        relatedProductIds: [],
-        image: 'https://example.com/blanket.jpg'
-    },
-    {
-        id: 'gift-3',
-        title: 'Chocolate Box',
-        letter: 'C',
-        description: 'Assorted gourmet chocolates in an elegant gift box.',
-        cost: '$$',
-        category: ['Food', 'Sweets'],
-        occasion: ['Valentine\'s Day', 'Thank You'],
-        relatedProductIds: [],
-        image: 'https://example.com/chocolate.jpg'
-    }
-];
 
 interface IdeasContextType {
     allIdeas: {
@@ -331,4 +287,6 @@ export const useIdeas = (): IdeasContextType => {
         throw new Error('useIdeas must be used within an IdeasProvider');
     }
     return context;
-}; 
+};
+
+export { DateIdea, GiftIdea };
