@@ -16,7 +16,7 @@ const CategorySelector: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.heading}>Choose your adventure</Text>
+            {/* <Text style={styles.heading}>Choose your adventure</Text> */}
             <View style={styles.categoryContainer}>
                 <TouchableOpacity
                     style={[

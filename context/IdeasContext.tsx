@@ -186,7 +186,7 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         });
 
         // Import needed function from businesses module
-        const { getBusinessById } = require('../data/businesses');
+        const { getBusinessById } = require('../api/business');
 
         // Get the business details to find its related idea
         const business = getBusinessById(businessId);
@@ -205,7 +205,7 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         );
 
         // Import needed functions from businesses module
-        const { getBusinessById, getBusinessesByIdeaId } = require('../data/businesses');
+        const { getBusinessById, getBusinessesByIdeaId } = require('../api/business');
 
         // Get the business details to find its related idea
         const business = getBusinessById(businessId);
