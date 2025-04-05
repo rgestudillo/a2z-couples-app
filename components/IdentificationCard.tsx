@@ -4,81 +4,95 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 interface IdentificationCardProps {
     personName?: string;
     personImage?: string;
-    birthday?: string;
-    school?: string;
-    yearLevel?: string;
+    zodiac?: string;
+    status?: string;
+    loveLanguage?: string;
     logoImage?: string;
+    backgroundColor?: string;
 }
 
 const IdentificationCard: React.FC<IdentificationCardProps> = ({
-    personName = "JISOO",
-    birthday = "03-01-1995",
-    school = "UP-CEBU",
-    yearLevel = "2ND YEAR",
+    personName = "KASHI",
+    zodiac = "TAURUS",
+    status = "TAKEN",
+    loveLanguage = "QUALITY TIME",
     personImage = "https://s3-alpha-sig.figma.com/img/28bb/5768/8aec94a14427729d3c545b14d593716b?Expires=1744588800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Dg0aAE7beshD9YHBC3B2JKCQBA5HtlvZGevzdox9K12G4UPOu80rOmfmatsu5G7c3bvEZ3J~bXdAiGPNKXim-hRfuxAZfg7znH7xdUOYhD7JBoVlIagBsXlnt~GRveRgimfEhKgs1~m59I3KwJiQ36ky8uL6qagYleT5eR6gGg13MbZH8tv8zj02iYRM5AyB0Zq4GxzTrunWKQfFUgKK1y0ke44nrKCJ7Jxa7kV3pUnhCdT1vG9O~RszM2QlXZThFZ5UCr6DxFvKKubU~t5xwfX3QpJLOcY2pG2tHabeW-okWmkBrGdYRqKQRd3nUgrXtLPYyASlS9alkWDEycPjcA__", // Default image
     logoImage = "https://s3-alpha-sig.figma.com/img/4c57/fd34/4ca0fbd7107b791f7c41ee59488b25d6?Expires=1744588800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=SPQpgyfBL7fQxfN1QGwhcU-CmrlzPWw6I-dHrloczXnfYRpRaaf-6d1J-zhnlm0JbHAkdIXdk5Ec05nl4Y9OoIg7X-bgStbsZgOfTA-mkbFywOH2kJgOlGhHJXMR5ew8ARlVfKjVtt2IOg-NnKkprfwA~1Apxo2~cSERjyCwkWXSnLfgKgSmoIyNp~HemRjRY7HHt1nQ8DtNV1aaT5~jQ8DtbBS7xQwGt4gCUx4eVlHb3EIRtJXpNW6wwvcELwAPFZJttN6TLcV6QQL8hSdgI2kJ1h~726o2vHeDFoWEesPw-O8rfyn-t~QpIPMUQgjVE-z4McQe38iDKFNq~8QhJA__",
+    backgroundColor = "#FFFFFF",
 }) => {
 
+    const textColor = '#000000';
 
     return (
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor }]}>
             <View style={styles.cardContent}>
-                {/* Photo Section */}
-                <View style={styles.photoSection}>
-                    <Image
-                        source={{ uri: personImage }}
-                        style={styles.photo}
-                        resizeMode="cover"
-                    />
-                </View>
-
-                {/* Barcode Section */}
-                <View style={styles.barcodeSection}>
-                    <Image
-                        source={require('../assets/images/Barcode.png')}
-                        style={styles.barcodeImage}
-                        resizeMode="contain"
-                    />
-                </View>
-
-                {/* Logo Section */}
-                <View style={styles.logoSection}>
-                    <Image
-                        source={{ uri: logoImage }}
-                        style={styles.logoImage}
-                        resizeMode="contain"
-                    />
-                </View>
-
-                {/* Divider */}
-                <View style={styles.divider} />
-
-                {/* Details Section */}
-                <View style={styles.detailsSection}>
-                    <View style={styles.detailRow}>
-                        <View style={styles.detailItem}>
-                            <Text style={styles.detailLabel}>NAME</Text>
-                            <Text style={styles.detailValue}>{personName}</Text>
-                        </View>
-                        <View style={styles.detailItem}>
-                            <Text style={styles.detailLabel}>BIRTHDAY</Text>
-                            <Text style={styles.detailValue}>{birthday}</Text>
-                        </View>
+                {/* Left Column */}
+                <View style={styles.leftColumn}>
+                    {/* Photo */}
+                    <View style={[styles.photoContainer, { borderColor: textColor }]}>
+                        <Image
+                            source={{ uri: personImage }}
+                            style={styles.photo}
+                            resizeMode="cover"
+                        />
                     </View>
 
-                    <View style={styles.detailRow}>
-                        <View style={styles.detailItem}>
-                            <Text style={styles.detailLabel}>SCHOOL</Text>
-                            <Text style={styles.detailValue}>{school}</Text>
-                        </View>
-                        <View style={styles.detailItem}>
-                            <Text style={styles.detailLabel}>YEAR LEVEL</Text>
-                            <Text style={styles.detailValue}>{yearLevel}</Text>
+                    {/* Barcode */}
+                    <View style={styles.barcodeContainer}>
+                        <Image
+                            source={require('../assets/images/Barcode.png')}
+                            style={styles.barcodeImage}
+                            resizeMode="contain"
+                        />
+                    </View>
+                </View>
+
+                {/* Right Column */}
+                <View style={styles.rightColumn}>
+                    {/* Logo */}
+                    <View style={styles.logoSection}>
+                        <Image
+                            source={{ uri: logoImage }}
+                            style={styles.logoImage}
+                            resizeMode="contain"
+                        />
+                    </View>
+
+                    {/* Dashed Divider */}
+                    <View style={[styles.divider, { borderColor: textColor }]} />
+
+                    {/* Details Section */}
+                    <View style={styles.detailsSection}>
+                        <View style={styles.detailsRow}>
+                            {/* Left Details Column */}
+                            <View style={styles.detailsColumn}>
+                                <View style={styles.detailItem}>
+                                    <Text style={[styles.detailLabel, { color: 'gray' }]}>NAME</Text>
+                                    <Text style={[styles.detailValue, { color: textColor }]} numberOfLines={1}>{personName.toUpperCase()}</Text>
+                                </View>
+
+                                <View style={styles.detailItem}>
+                                    <Text style={[styles.detailLabel, { color: 'gray' }]}>STATUS</Text>
+                                    <Text style={[styles.detailValue, { color: textColor }]} numberOfLines={1}>{status.toUpperCase()}</Text>
+                                </View>
+                            </View>
+
+                            {/* Right Details Column */}
+                            <View style={styles.detailsColumn}>
+                                <View style={styles.detailItem}>
+                                    <Text style={[styles.detailLabel, { color: 'gray' }]}>ZODIAC</Text>
+                                    <Text style={[styles.detailValue, { color: textColor }]}>{zodiac.toUpperCase()}</Text>
+                                </View>
+
+                                <View style={styles.detailItem}>
+                                    <Text style={[styles.detailLabel, { color: 'gray' }]}>LOVE LANGUAGE</Text>
+                                    <Text style={[styles.detailValue, { color: textColor }]} numberOfLines={1}>{loveLanguage.toUpperCase()}</Text>
+                                </View>
+                            </View>
                         </View>
                     </View>
                 </View>
             </View>
-
         </View>
     );
 };
@@ -86,10 +100,10 @@ const IdentificationCard: React.FC<IdentificationCardProps> = ({
 const styles = StyleSheet.create({
     card: {
         width: '100%',
-        height: 200,
+        height: 179,
         backgroundColor: 'white',
-        borderRadius: 16,
-        borderWidth: 1,
+        borderRadius: 10,
+        borderWidth: 1.5,
         borderColor: '#000',
         overflow: 'hidden',
         shadowColor: '#ffb8c6',
@@ -97,135 +111,86 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 8,
         elevation: 5,
-        position: 'relative',
     },
     cardContent: {
         flex: 1,
+        flexDirection: 'row',
         padding: 15,
     },
-    photoSection: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        width: '35%',
-        aspectRatio: 103 / 128,
+    leftColumn: {
+        width: 103,
+        height: '100%',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginRight: 20,
+    },
+    rightColumn: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+    },
+    photoContainer: {
+        width: 103,
+        height: 128,
         borderWidth: 2,
         borderColor: '#000',
-        borderRadius: 8,
         overflow: 'hidden',
-        zIndex: 1,
     },
     photo: {
         width: '100%',
         height: '100%',
     },
-    barcodeSection: {
-        position: 'absolute',
-        left: 15,
-        bottom: 0,
-        width: '35%',
-        height: 40,
+    barcodeContainer: {
+        width: 103,
+        height: 18,
+        marginTop: 3,
         justifyContent: 'center',
+        alignItems: 'center',
     },
     barcodeImage: {
         width: '100%',
         height: '100%',
     },
-    barcode: {
-        flexDirection: 'row',
-        height: 40,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
     logoSection: {
-        position: 'absolute',
-        top: 16,
-        right: 16,
-        width: '55%',
-        alignItems: 'center',
-    },
-    logoImage: {
         width: '100%',
-        height: 75,
-        borderRadius: 12,
-    },
-    logoContainer: {
-        width: '100%',
+        height: '50%',
         alignItems: 'center',
         justifyContent: 'center',
     },
-    logoInner: {
-        backgroundColor: '#FF6B81',
-        paddingVertical: 10,
-        paddingHorizontal: 14,
-        borderRadius: 24,
+    logoImage: {
         width: '100%',
-        alignItems: 'center',
-    },
-    starContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 2,
-    },
-    bigStar: {
-        marginRight: -8,
-    },
-    smallStar: {
-        marginTop: -8,
-    },
-    logoText: {
-        color: 'white',
-        fontSize: 14,
-        fontWeight: '700',
-        letterSpacing: 1,
-    },
-    logoTextBig: {
-        color: 'white',
-        fontSize: 20,
-        fontWeight: '800',
-        letterSpacing: 1,
+        height: '100%',
+        aspectRatio: 746 / 325,
     },
     divider: {
-        position: 'absolute',
-        top: '55%',
-        left: '45%',
-        right: 16,
         height: 1,
-        backgroundColor: '#000',
-        marginVertical: 12,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        marginVertical: 8,
     },
     detailsSection: {
-        position: 'absolute',
-        bottom: 0,
-        right: 16,
-        width: '55%',
+        flex: 1,
+        justifyContent: 'center',
     },
-    detailRow: {
+    detailsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 12,
+    },
+    detailsColumn: {
+        flex: 1,
+        justifyContent: 'space-between',
+        marginRight: 5,
     },
     detailItem: {
-        flex: 1,
+        marginTop: 8,
     },
     detailLabel: {
         fontSize: 10,
-        color: '#777',
         fontWeight: '500',
     },
     detailValue: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#333',
-    },
-    cornerCircle: {
-        position: 'absolute',
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#FF9800',
-        top: -12,
-        right: 24,
     },
 });
 

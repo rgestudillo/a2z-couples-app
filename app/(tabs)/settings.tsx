@@ -21,6 +21,56 @@ type SettingSection = {
 export default function SettingsScreen() {
     const settingSections: SettingSection[] = [
         {
+            title: 'Partnerships',
+            items: [
+                {
+                    title: 'List Your Business',
+                    subtitle: 'Add your venue as a partner location',
+                    icon: 'business-outline',
+                    iconColor: '#5AC8FA',
+                    iconBgColor: '#EEFAFF',
+                    route: '/settings/business-partnership',
+                },
+                {
+                    title: 'Feature Your Products',
+                    subtitle: 'Showcase your products in our app',
+                    icon: 'pricetag-outline',
+                    iconColor: '#00CC99',
+                    iconBgColor: '#E6FFF8',
+                    route: '/settings/product-partnership',
+                },
+                {
+                    title: 'Partnership Benefits',
+                    subtitle: 'Learn about partnering with us',
+                    icon: 'briefcase-outline',
+                    iconColor: '#FF9500',
+                    iconBgColor: '#FFF4E5',
+                    route: '/settings/partnership-info',
+                },
+            ],
+        },
+        {
+            title: 'Suggestions',
+            items: [
+                {
+                    title: 'Date Ideas',
+                    subtitle: 'Suggest new date ideas for couples',
+                    icon: 'heart-outline',
+                    iconColor: '#FF3B30',
+                    iconBgColor: '#FFECEB',
+                    route: '/settings/date-ideas',
+                },
+                {
+                    title: 'Gift Ideas',
+                    subtitle: 'Suggest gift ideas for your partner',
+                    icon: 'gift-outline',
+                    iconColor: '#FF9500',
+                    iconBgColor: '#FFF4E5',
+                    route: '/settings/gift-ideas',
+                },
+            ],
+        },
+        {
             title: 'App Settings',
             items: [
                 {
