@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,45 +6,113 @@ import {
     ScrollView,
     TouchableOpacity,
     SafeAreaView,
-    Linking
+    Linking,
+    ActivityIndicator
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useIdeas, IdeaType } from '@/context/IdeasContext';
 import { getProductById } from '@/api/product';
+import { Product } from '@/model/Product';
 import { GiftIdea } from '@/model/GiftIdea';
+import RefreshableScrollView from '@/components/RefreshableScrollView';
+import { showNetworkRequiredMessage } from '@/utils/showOfflineToast';
 
 export default function ProductDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const { allIdeas } = useIdeas();
+    const [product, setProduct] = useState<Product | undefined>();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [relatedGiftIdeas, setRelatedGiftIdeas] = useState<GiftIdea[]>([]);
 
-    // Find the product based on ID
-    const product = getProductById(id as string);
+    const fetchProduct = async () => {
+        if (!id) {
+            setError("Missing product ID");
+            setLoading(false);
+            return;
+        }
 
-    if (!product) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>Product not found</Text>
-                </View>
-            </SafeAreaView>
-        );
-    }
+        try {
+            setLoading(true);
+            const productData = await getProductById(id as string);
+            setProduct(productData);
 
-    // Find related gift ideas - only executed if product exists
-    const relatedGiftIdeas = product.relatedGiftIds
-        .map(giftId => allIdeas[IdeaType.GIFT].find(idea => idea.id === giftId))
-        .filter((idea): idea is GiftIdea => idea !== undefined);
+            if (!productData) {
+                setError("Product not found");
+            } else {
+                setError(null);
 
-    const handleBuyNow = () => {
-        if (product.affiliateLink) {
+                // Find related gift ideas
+                if (allIdeas && allIdeas[IdeaType.GIFT] && productData.relatedGiftIds) {
+                    const related = productData.relatedGiftIds
+                        .map(giftId => allIdeas[IdeaType.GIFT].find(idea => idea.id === giftId))
+                        .filter((idea): idea is GiftIdea => idea !== undefined);
+                    setRelatedGiftIdeas(related);
+                }
+            }
+        } catch (err) {
+            console.error("Error fetching product:", err);
+            setError("Failed to load product details");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProduct();
+    }, [id, allIdeas]);
+
+    const handleRefreshComplete = (success: boolean) => {
+        if (success) {
+            fetchProduct();
+        }
+    };
+
+    const handleBuyNow = async () => {
+        if (!product?.affiliateLink) return;
+
+        // Check network before opening external link
+        const canProceed = await showNetworkRequiredMessage("Opening product link");
+        if (canProceed) {
             Linking.openURL(product.affiliateLink);
         }
     };
 
+    // Loading state
+    if (loading) {
+        return (
+            <SafeAreaView style={[styles.container, styles.centerContent]}>
+                <ActivityIndicator size="large" color="#FF6B81" />
+                <Text style={styles.loadingText}>Loading product details...</Text>
+            </SafeAreaView>
+        );
+    }
+
+    // Error state
+    if (error || !product) {
+        return (
+            <SafeAreaView style={[styles.container, styles.centerContent]}>
+                <Ionicons name="alert-circle-outline" size={48} color="#FF3B30" />
+                <Text style={styles.errorText}>{error || "Product not found"}</Text>
+                <TouchableOpacity
+                    style={styles.retryButton}
+                    onPress={fetchProduct}
+                >
+                    <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content}>
+            <Stack.Screen options={{ title: product.name }} />
+
+            <RefreshableScrollView
+                onRefreshComplete={handleRefreshComplete}
+                contentContainerStyle={styles.content}
+            >
                 {/* Product Header */}
                 <View style={styles.header}>
                     <Text style={styles.productName}>{product.name}</Text>
@@ -59,11 +127,11 @@ export default function ProductDetailScreen() {
 
                 {/* Tags */}
                 <View style={styles.tagsContainer}>
-                    {product.tags.map((tag, index) => (
+                    {product.tags?.map((tag, index) => (
                         <View key={index} style={styles.tag}>
                             <Text style={styles.tagText}>{tag}</Text>
                         </View>
-                    ))}
+                    )) || null}
                 </View>
 
                 {/* Description */}
@@ -96,7 +164,7 @@ export default function ProductDetailScreen() {
                 <Text style={styles.affiliateDisclaimer}>
                     This link contains affiliate codes that help support the app.
                 </Text>
-            </ScrollView>
+            </RefreshableScrollView>
         </SafeAreaView>
     );
 }
@@ -105,6 +173,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+    },
+    centerContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
     },
     content: {
         padding: 20,
@@ -117,6 +190,24 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 18,
         color: '#666',
+        marginTop: 12,
+        textAlign: 'center',
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 12,
+    },
+    retryButton: {
+        marginTop: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#FF6B81',
+        borderRadius: 6,
+    },
+    retryButtonText: {
+        color: 'white',
+        fontWeight: '600',
     },
     header: {
         marginBottom: 16,

@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import IdeaCard from '@/components/IdeaCard';
 import { useIdeas, IdeaType } from '@/context/IdeasContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DateIdea } from '@/model/DateIdea';
+import { GiftIdea } from '@/model/GiftIdea';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const { width } = Dimensions.get('window');
@@ -23,11 +25,27 @@ export default function WrappedScreen() {
     const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
     const [showImagesModal, setShowImagesModal] = useState(false);
     const [letterImages, setLetterImages] = useState<{ [key: string]: string[] }>({});
+    const [favoriteIdeasList, setFavoriteIdeasList] = useState<(DateIdea | GiftIdea)[]>([]);
 
     // Update activeTab when currentCategory changes
     useEffect(() => {
         setActiveTab(currentCategory);
     }, [currentCategory]);
+
+    // Load favorite ideas when activeTab changes
+    useEffect(() => {
+        const loadFavorites = async () => {
+            try {
+                const favorites = await getFavoriteIdeas(activeTab);
+                setFavoriteIdeasList(favorites);
+            } catch (error) {
+                console.error('Error loading favorite ideas:', error);
+                setFavoriteIdeasList([]);
+            }
+        };
+
+        loadFavorites();
+    }, [activeTab, getFavoriteIdeas]);
 
     // Load images for completed ideas whenever the active tab changes
     useEffect(() => {
@@ -100,9 +118,6 @@ export default function WrappedScreen() {
     };
 
     const { completedLetters, totalAvailableLetters, completedPercent } = getCompletionData();
-
-    // Get favorite ideas
-    const favoriteIdeas = getFavoriteIdeas(activeTab);
 
     const handleTabChange = (tab: IdeaType) => {
         setActiveTab(tab);
@@ -230,7 +245,7 @@ export default function WrappedScreen() {
                         </View>
                         <Text style={styles.achievementTitle}>Favorites</Text>
                         <Text style={styles.achievementValue}>
-                            {favoriteIdeas.length}
+                            {favoriteIdeasList.length}
                         </Text>
                     </View>
                 </View>
@@ -271,7 +286,7 @@ export default function WrappedScreen() {
 
     // Render favorites
     const renderFavorites = () => {
-        if (favoriteIdeas.length === 0) {
+        if (favoriteIdeasList.length === 0) {
             return (
                 <View style={styles.emptyStateContainer}>
                     <Ionicons name="heart-outline" size={60} color="#ddd" />
@@ -285,7 +300,7 @@ export default function WrappedScreen() {
         return (
             <View style={styles.favoritesContainer}>
                 <Text style={styles.sectionTitle}>Your Favorites</Text>
-                {favoriteIdeas.map(idea => (
+                {favoriteIdeasList.map(idea => (
                     <IdeaCard
                         key={idea.id}
                         idea={idea}
@@ -842,5 +857,5 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 180,
         borderRadius: 8,
-    },
+    }
 }); 

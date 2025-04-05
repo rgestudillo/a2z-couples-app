@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
-  FlatList,
   StatusBar,
   TouchableOpacity,
-  Image
+  Image,
+  ActivityIndicator
 } from 'react-native';
 import IdeaCard from '@/components/IdeaCard';
 import { useIdeas, IdeaType } from '@/context/IdeasContext';
@@ -16,18 +16,23 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import CategorySelector from '@/components/CategorySelector';
 import IdentificationCard from '../../components/IdentificationCard';
+import RefreshableFlatList from '@/components/RefreshableFlatList';
 
 export default function HomeScreen() {
-  const { allIdeas, currentCategory } = useIdeas();
-  const ideas = allIdeas[currentCategory];
+  const { allIdeas, currentCategory, loading } = useIdeas();
+  const [featuredIdeas, setFeaturedIdeas] = useState<BaseIdea[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Get 2 random ideas to feature from the current category
-  const getRandomIdeas = (count: number) => {
-    const shuffled = [...ideas].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-  };
-
-  const featuredIdeas = getRandomIdeas(2);
+  // Get 2 random ideas to feature from the current category when ideas load or category changes
+  useEffect(() => {
+    if (!loading && allIdeas && allIdeas[currentCategory] && allIdeas[currentCategory].length > 0) {
+      const ideas = allIdeas[currentCategory];
+      const shuffled = [...ideas].sort(() => 0.5 - Math.random());
+      setFeaturedIdeas(shuffled.slice(0, 2));
+    } else {
+      setFeaturedIdeas([]);
+    }
+  }, [allIdeas, currentCategory, loading]);
 
   // Navigate to letters tab
   const handleBrowseAllPress = () => {
@@ -37,6 +42,12 @@ export default function HomeScreen() {
   // Navigate to browse tab
   const handleBrowsePress = () => {
     router.push('/(tabs)/browse' as any);
+  };
+
+  // Handle refresh completion
+  const handleRefreshComplete = (success: boolean) => {
+    // Show toast or provide additional user feedback here if needed
+    console.log('Data refresh completed with status:', success);
   };
 
   // Render header section with the alphabet grid
@@ -98,10 +109,29 @@ export default function HomeScreen() {
     </>
   );
 
+  // Render empty or loading state
+  const renderEmptyComponent = () => {
+    if (loading) {
+      return (
+        <View style={styles.emptyState}>
+          <ActivityIndicator size="large" color="#FF6B81" />
+          <Text style={styles.loadingText}>Loading ideas...</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.emptyState}>
+        <Ionicons name="heart-outline" size={60} color="#ffb8c6" />
+        <Text style={styles.emptyText}>No ideas yet</Text>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <FlatList
+      <RefreshableFlatList
         data={featuredIdeas}
         keyExtractor={(item: BaseIdea) => item.id}
         renderItem={({ item }) => (
@@ -112,12 +142,8 @@ export default function HomeScreen() {
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons name="heart-outline" size={60} color="#ffb8c6" />
-            <Text style={styles.emptyText}>No ideas yet</Text>
-          </View>
-        }
+        ListEmptyComponent={renderEmptyComponent}
+        onRefreshComplete={handleRefreshComplete}
       />
     </SafeAreaView>
   );
@@ -208,10 +234,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 40,
+    minHeight: 200,
   },
   emptyText: {
     fontSize: 16,
     color: '#888',
     marginTop: 12,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 16,
   },
 });

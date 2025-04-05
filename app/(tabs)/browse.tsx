@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { getAllBusinesses } from '@/api/business';
 import { getAllProducts } from '@/api/product';
 import { Business } from '@/model/Business';
 import { Product } from '@/model/Product';
 import BusinessCard from '@/components/BusinessCard';
 import { Ionicons } from '@expo/vector-icons';
-import { useIdeas, IdeaType, GiftIdea } from '@/context/IdeasContext';
+import { useIdeas, IdeaType } from '@/context/IdeasContext';
 import ProductCard from '@/components/ProductCard';
+import { useFocusEffect } from 'expo-router';
 
 // Define browse sections
 enum BrowseSection {
@@ -17,11 +18,20 @@ enum BrowseSection {
 
 const BrowseScreen = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const allBusinesses = getAllBusinesses();
-    const allProducts = getAllProducts();
-    const { currentCategory, setCurrentCategory, allIdeas } = useIdeas();
+    const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { currentCategory, setCurrentCategory, refreshIdeas } = useIdeas();
     const [activeSection, setActiveSection] = useState<BrowseSection>(
         currentCategory === IdeaType.DATE ? BrowseSection.PLACES : BrowseSection.PRODUCTS
+    );
+
+    // Load data on mount and when screen is focused
+    useFocusEffect(
+        React.useCallback(() => {
+            loadData();
+            return () => { };
+        }, [])
     );
 
     // Handle section changes
@@ -37,6 +47,27 @@ const BrowseScreen = () => {
         }
     };
 
+    // Load data from Firebase
+    const loadData = async () => {
+        try {
+            setIsLoading(true);
+
+            // Refresh the ideas context data
+            await refreshIdeas();
+
+            // Load businesses and products
+            const businessesData = await getAllBusinesses();
+            const productsData = await getAllProducts();
+
+            setBusinesses(businessesData);
+            setProducts(productsData);
+        } catch (error) {
+            console.error('Error loading data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // Sync activeSection with currentCategory when currentCategory changes externally
     useEffect(() => {
         const newSection = currentCategory === IdeaType.DATE ? BrowseSection.PLACES : BrowseSection.PRODUCTS;
@@ -47,14 +78,14 @@ const BrowseScreen = () => {
     }, [currentCategory]);
 
     // Filter businesses based on search term
-    const filteredBusinesses = allBusinesses.filter((business: Business) =>
+    const filteredBusinesses = businesses.filter((business: Business) =>
         business.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         business.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
         business.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Filter products based on search term
-    const filteredProducts = allProducts.filter((product: Product) =>
+    const filteredProducts = products.filter((product: Product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
         product.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -62,6 +93,15 @@ const BrowseScreen = () => {
 
     // Render empty state based on active section
     const renderEmptyState = () => {
+        if (isLoading) {
+            return (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={activeSection === BrowseSection.PLACES ? "#FF6B81" : "#7986CB"} />
+                    <Text style={styles.loadingText}>Loading...</Text>
+                </View>
+            );
+        }
+
         const iconName = activeSection === BrowseSection.PLACES ? "business" : "gift";
         const themeColor = activeSection === BrowseSection.PLACES ? "#FF6B81" : "#7986CB";
 
@@ -156,7 +196,7 @@ const BrowseScreen = () => {
             </View>
 
             {activeSection === BrowseSection.PLACES ? (
-                filteredBusinesses.length === 0 ? (
+                isLoading || filteredBusinesses.length === 0 ? (
                     renderEmptyState()
                 ) : (
                     <FlatList
@@ -165,10 +205,12 @@ const BrowseScreen = () => {
                         renderItem={({ item }) => <BusinessCard business={item} />}
                         contentContainerStyle={styles.listContent}
                         showsVerticalScrollIndicator={false}
+                        onRefresh={loadData}
+                        refreshing={isLoading}
                     />
                 )
             ) : (
-                filteredProducts.length === 0 ? (
+                isLoading || filteredProducts.length === 0 ? (
                     renderEmptyState()
                 ) : (
                     <FlatList
@@ -177,6 +219,8 @@ const BrowseScreen = () => {
                         renderItem={({ item }) => <ProductCard product={item} />}
                         contentContainerStyle={styles.listContent}
                         showsVerticalScrollIndicator={false}
+                        onRefresh={loadData}
+                        refreshing={isLoading}
                     />
                 )
             )}
@@ -292,6 +336,16 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#999',
         textAlign: 'center',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 12,
+        fontSize: 16,
+        color: '#666',
     },
 });
 

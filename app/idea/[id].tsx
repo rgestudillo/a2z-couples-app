@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Linking, Modal, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Linking, Modal, Image, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useIdeas, IdeaType, DateIdea, GiftIdea } from '@/context/IdeasContext';
@@ -62,11 +62,43 @@ export default function IdeaDetailScreen() {
     // Use type from params or fall back to current category
     const ideaType = (type || currentCategory) as IdeaType;
 
-    const idea = id ? getIdeaById(ideaType, id) : undefined;
+    // States for async data
+    const [idea, setIdea] = useState<DateIdea | GiftIdea | undefined>(undefined);
+    const [isLoadingIdea, setIsLoadingIdea] = useState(true);
+    const [relatedBusinesses, setRelatedBusinesses] = useState<Business[]>([]);
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+    const [isLoadingRelated, setIsLoadingRelated] = useState(true);
 
-    // Get related items based on idea type
-    const relatedBusinesses = (ideaType === IdeaType.DATE && id) ? getBusinessesByIdeaId(id) : [];
-    const relatedProducts = (ideaType === IdeaType.GIFT && id) ? getProductsByGiftId(id) : [];
+    // Load idea and related data
+    useEffect(() => {
+        async function loadData() {
+            if (!id) return;
+
+            setIsLoadingIdea(true);
+            try {
+                // Load the idea
+                const ideaData = await getIdeaById(ideaType, id);
+                setIdea(ideaData);
+
+                // Load related data based on idea type
+                setIsLoadingRelated(true);
+                if (ideaType === IdeaType.DATE) {
+                    const businesses = await getBusinessesByIdeaId(id);
+                    setRelatedBusinesses(businesses);
+                } else if (ideaType === IdeaType.GIFT) {
+                    const products = await getProductsByGiftId(id);
+                    setRelatedProducts(products);
+                }
+            } catch (error) {
+                console.error('Error loading idea data:', error);
+            } finally {
+                setIsLoadingIdea(false);
+                setIsLoadingRelated(false);
+            }
+        }
+
+        loadData();
+    }, [id, ideaType, getIdeaById]);
 
     // New states for modal and images
     const [congratsModalVisible, setCongratsModalVisible] = useState(false);
@@ -100,10 +132,24 @@ export default function IdeaDetailScreen() {
         }
     };
 
+    // Loading state
+    if (isLoadingIdea) {
+        return (
+            <SafeAreaView style={[styles.container, styles.centerContent]}>
+                <ActivityIndicator size="large" color={ideaType === IdeaType.DATE ? "#FF6B81" : "#7986CB"} />
+                <Text style={styles.loadingText}>Loading idea...</Text>
+            </SafeAreaView>
+        );
+    }
+
+    // Error state
     if (!idea) {
         return (
             <SafeAreaView style={[styles.container, styles.centerContent]}>
                 <Text style={styles.errorText}>Idea not found</Text>
+                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                    <Text style={styles.backButtonText}>Go Back</Text>
+                </TouchableOpacity>
             </SafeAreaView>
         );
     }
@@ -248,31 +294,53 @@ export default function IdeaDetailScreen() {
                 letter={idea.letter}
             />
 
-            {ideaType === IdeaType.DATE && relatedBusinesses.length > 0 && (
-                <View style={styles.relatedSection}>
-                    <Text style={styles.sectionTitle}>Related Businesses</Text>
-                    <Text style={styles.sectionSubtitle}>
-                        Perfect places to experience this date idea
-                    </Text>
+            {ideaType === IdeaType.DATE && (
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Places to Try</Text>
+                    {isLoadingRelated && (
+                        <ActivityIndicator size="small" color="#FF6B81" style={{ marginLeft: 10 }} />
+                    )}
                 </View>
             )}
 
-            {ideaType === IdeaType.GIFT && relatedProducts.length > 0 && (
-                <View style={styles.relatedSection}>
-                    <Text style={styles.sectionTitle}>Shopping Options</Text>
-                    <Text style={styles.sectionSubtitle}>
-                        Where to buy this gift (affiliate links)
-                    </Text>
+            {ideaType === IdeaType.GIFT && (
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Related Products</Text>
+                    {isLoadingRelated && (
+                        <ActivityIndicator size="small" color="#7986CB" style={{ marginLeft: 10 }} />
+                    )}
                 </View>
             )}
         </>
     );
 
+    const renderEmptyComponent = () => {
+        if (isLoadingRelated) {
+            return null; // Don't show empty state while loading
+        }
+
+        if (ideaType === IdeaType.DATE) {
+            return (
+                <View style={styles.emptyContainer}>
+                    <Ionicons name="business" size={50} color="#ccc" />
+                    <Text style={styles.emptyText}>No places found for this idea</Text>
+                </View>
+            );
+        } else {
+            return (
+                <View style={styles.emptyContainer}>
+                    <Ionicons name="gift" size={50} color="#ccc" />
+                    <Text style={styles.emptyText}>No products found for this idea</Text>
+                </View>
+            );
+        }
+    };
+
+    // Render the main component
     return (
-        <>
+        <SafeAreaView style={styles.container}>
             <Stack.Screen
                 options={{
-                    title: idea.title,
                     headerRight: () => (
                         <TouchableOpacity
                             onPress={handleFavoriteToggle}
@@ -280,279 +348,246 @@ export default function IdeaDetailScreen() {
                         >
                             <Ionicons
                                 name={isFavorite ? 'heart' : 'heart-outline'}
-                                size={28}
-                                color={isFavorite ? '#ff6b6b' : '#333'}
+                                size={24}
+                                color={isFavorite ? "#FF6B81" : "#999"}
                             />
                         </TouchableOpacity>
                     ),
+                    title: ""
                 }}
             />
 
-            <SafeAreaView style={styles.container}>
-                {ideaType === IdeaType.DATE && relatedBusinesses.length > 0 ? (
-                    <FlatList
-                        data={relatedBusinesses}
-                        keyExtractor={(item: Business) => item.id}
-                        renderItem={({ item }) => (
-                            <BusinessCard
-                                key={item.id}
-                                business={item}
-                            />
-                        )}
-                        ListHeaderComponent={renderHeader}
-                        contentContainerStyle={styles.content}
-                    />
-                ) : ideaType === IdeaType.GIFT && relatedProducts.length > 0 ? (
-                    <FlatList
-                        data={relatedProducts}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                            <ProductCard product={item} />
-                        )}
-                        ListHeaderComponent={renderHeader}
-                        contentContainerStyle={styles.content}
-                    />
-                ) : (
-                    <FlatList
-                        data={[]}
-                        keyExtractor={() => "empty"}
-                        renderItem={() => null}
-                        ListHeaderComponent={renderHeader}
-                        contentContainerStyle={styles.content}
-                    />
-                )}
-            </SafeAreaView>
+            {ideaType === IdeaType.DATE ? (
+                <FlatList
+                    data={relatedBusinesses}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => <BusinessCard business={item} />}
+                    ListHeaderComponent={renderHeader}
+                    ListEmptyComponent={renderEmptyComponent}
+                    contentContainerStyle={styles.contentContainer}
+                />
+            ) : (
+                <FlatList
+                    data={relatedProducts}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => <ProductCard product={item} />}
+                    ListHeaderComponent={renderHeader}
+                    ListEmptyComponent={renderEmptyComponent}
+                    contentContainerStyle={styles.contentContainer}
+                />
+            )}
 
-            {/* Congratulations Modal */}
+            {/* Congrats Modal */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={congratsModalVisible}
                 onRequestClose={() => setCongratsModalVisible(false)}
             >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Ionicons name="checkmark-circle" size={60} color="#4CAF50" style={styles.modalIcon} />
-                        <Text style={styles.modalTitle}>Congratulations!</Text>
-                        <Text style={styles.modalText}>You've completed this idea!</Text>
-                        <Text style={styles.modalSubText}>Would you like to add some photos to remember this moment?</Text>
-
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.cameraButton]}
-                                onPress={async () => {
-                                    // First check camera permissions
-                                    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-                                    if (status !== 'granted') {
-                                        Alert.alert('Permission needed', 'We need camera permission to take photos');
-                                        return;
-                                    }
-
-                                    // Hide modal first
-                                    setCongratsModalVisible(false);
-
-                                    // Need to wait for modal to fully close before camera can open
-                                    setTimeout(async () => {
-                                        try {
-                                            const result = await ImagePicker.launchCameraAsync({
-                                                allowsEditing: false,
-                                                quality: 0.8,
-                                            });
-
-                                            if (!result.canceled && result.assets && result.assets.length > 0) {
-                                                const newImages = [...attachedImages, result.assets[0].uri];
-                                                setAttachedImages(newImages);
-                                                saveAttachedImages(newImages);
-                                            }
-                                        } catch (error) {
-                                            console.error('Error taking photo:', error);
-                                            Alert.alert('Error', 'Failed to take photo. Please try again.');
-                                        }
-                                    }, 800); // Increased timeout to ensure modal is fully closed
-                                }}
-                            >
-                                <Ionicons name="camera" size={24} color="#fff" />
-                                <Text style={styles.modalButtonText}>Take Photo</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.galleryButton]}
-                                onPress={() => {
-                                    // Hide modal first
-                                    setCongratsModalVisible(false);
-
-                                    // Need to wait for modal to fully close before picker can open
-                                    setTimeout(async () => {
-                                        try {
-                                            const result = await ImagePicker.launchImageLibraryAsync({
-                                                allowsEditing: false,
-                                                quality: 0.8,
-                                                allowsMultipleSelection: true,
-                                                selectionLimit: 10,
-                                            });
-
-                                            if (!result.canceled && result.assets && result.assets.length > 0) {
-                                                const newImageUris = result.assets.map(asset => asset.uri);
-                                                const newImages = [...attachedImages, ...newImageUris];
-                                                setAttachedImages(newImages);
-                                                saveAttachedImages(newImages);
-                                            }
-                                        } catch (error) {
-                                            console.error('Error picking image:', error);
-                                            Alert.alert('Error', 'Failed to pick image. Please try again.');
-                                        }
-                                    }, 800); // Increased timeout to ensure modal is fully closed
-                                }}
-                            >
-                                <Ionicons name="images" size={24} color="#fff" />
-                                <Text style={styles.modalButtonText}>Gallery</Text>
-                            </TouchableOpacity>
-                        </View>
-
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <Ionicons name="checkmark-circle" size={60} color="#4CAF50" />
+                        <Text style={styles.congratsTitle}>Congratulations!</Text>
+                        <Text style={styles.congratsText}>
+                            You've completed this {ideaType === IdeaType.DATE ? 'date' : 'gift'} idea!
+                        </Text>
                         <TouchableOpacity
-                            style={styles.skipButton}
+                            style={styles.closeButton}
                             onPress={() => setCongratsModalVisible(false)}
                         >
-                            <Text style={styles.skipButtonText}>Skip for now</Text>
+                            <Text style={styles.closeButtonText}>Close</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
-        </>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f7f7f7',
+        backgroundColor: '#fff',
     },
     centerContent: {
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 32,
     },
-    errorText: {
-        fontSize: 18,
-        color: '#666',
-    },
-    content: {
-        padding: 20,
-    },
-    favoriteButton: {
-        padding: 8,
+    contentContainer: {
+        padding: 16,
+        paddingBottom: 32,
     },
     letterBadge: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#ff6b6b',
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
-        alignSelf: 'center',
+        borderWidth: 2,
+        borderColor: '#FF6B81',
         marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        position: 'relative',
     },
     letterText: {
-        fontSize: 32,
+        fontSize: 24,
         fontWeight: '700',
-        color: '#fff',
+        color: '#FF6B81',
     },
     imageBadge: {
         position: 'absolute',
-        top: 0,
-        right: 0,
-        backgroundColor: '#4CAF50',
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        alignItems: 'center',
+        top: -5,
+        right: -5,
+        backgroundColor: '#7986CB',
+        width: 22,
+        height: 22,
+        borderRadius: 11,
         justifyContent: 'center',
+        alignItems: 'center',
     },
     imageBadgeText: {
         color: '#fff',
         fontSize: 12,
-        fontWeight: 'bold',
+        fontWeight: '700',
     },
     title: {
-        fontSize: 26,
+        fontSize: 28,
         fontWeight: '700',
         color: '#333',
-        textAlign: 'center',
-        marginBottom: 24,
+        marginBottom: 16,
     },
     description: {
         fontSize: 16,
-        color: '#444',
+        color: '#666',
         lineHeight: 24,
-        marginBottom: 32,
+        marginBottom: 24,
     },
     infoContainer: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 16,
         marginBottom: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 3,
-        elevation: 1,
     },
     infoItem: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 12,
     },
-    infoText: {
-        fontSize: 16,
-        color: '#444',
-        marginLeft: 12,
-    },
     infoLabel: {
         fontWeight: '600',
+        color: '#444',
+    },
+    infoText: {
+        fontSize: 16,
+        color: '#666',
+        marginLeft: 8,
     },
     categoryContainer: {
-        marginBottom: 32,
+        marginBottom: 24,
     },
     categoryTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#333',
-        marginBottom: 12,
+        color: '#444',
+        marginBottom: 8,
     },
     categoryTags: {
         flexDirection: 'row',
         flexWrap: 'wrap',
     },
     categoryTag: {
-        backgroundColor: '#e2e2e2',
-        borderRadius: 16,
+        backgroundColor: '#f0f0f0',
         paddingVertical: 6,
         paddingHorizontal: 12,
+        borderRadius: 16,
         marginRight: 8,
         marginBottom: 8,
     },
     categoryText: {
+        color: '#666',
         fontSize: 14,
-        color: '#444',
     },
-    relatedSection: {
+    actions: {
         marginBottom: 24,
     },
-    sectionTitle: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: '#333',
-        marginBottom: 8,
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        borderRadius: 8,
+        backgroundColor: '#4CAF50',
     },
-    sectionSubtitle: {
+    completedButton: {
+        backgroundColor: '#FF6B81',
+    },
+    incompleteButton: {
+        backgroundColor: '#4CAF50',
+    },
+    actionButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '600',
+        fontSize: 16,
+        marginLeft: 8,
+    },
+    completedBanner: {
+        flexDirection: 'row',
+        backgroundColor: '#4CAF50',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
+    },
+    completedBannerText: {
+        color: '#FFFFFF',
+        fontWeight: '600',
+        fontSize: 16,
+        marginLeft: 8,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+        marginTop: 8,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#444',
+    },
+    loadingText: {
         fontSize: 16,
         color: '#666',
+        marginTop: 16,
+    },
+    errorText: {
+        fontSize: 18,
+        color: '#666',
         marginBottom: 16,
+    },
+    backButton: {
+        backgroundColor: '#FF6B81',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    backButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '600',
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 32,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#999',
+        marginTop: 16,
+        textAlign: 'center',
+    },
+    favoriteButton: {
+        padding: 8,
     },
     productCard: {
         backgroundColor: '#fff',
@@ -564,6 +599,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
+        borderLeftWidth: 3,
+        borderLeftColor: '#7986CB',
     },
     productHeader: {
         flexDirection: 'row',
@@ -572,22 +609,20 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     productName: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '600',
         color: '#333',
         flex: 1,
-        marginRight: 8,
     },
     productPrice: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700',
-        color: '#ff6b6b',
+        color: '#7986CB',
     },
     productDescription: {
         fontSize: 14,
         color: '#666',
         marginBottom: 12,
-        lineHeight: 20,
     },
     productFooter: {
         flexDirection: 'row',
@@ -601,129 +636,59 @@ const styles = StyleSheet.create({
     ratingText: {
         marginLeft: 4,
         fontSize: 14,
-        fontWeight: '600',
         color: '#666',
     },
     shopButton: {
-        backgroundColor: '#5a67d8',
+        backgroundColor: '#7986CB22',
         paddingVertical: 6,
         paddingHorizontal: 12,
-        borderRadius: 8,
+        borderRadius: 16,
     },
     shopButtonText: {
-        color: '#fff',
-        fontWeight: '600',
+        color: '#7986CB',
         fontSize: 12,
-    },
-    completedBanner: {
-        backgroundColor: '#4CAF50',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        marginBottom: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    completedBannerText: {
-        color: '#FFFFFF',
         fontWeight: '600',
-        marginLeft: 8,
     },
-    actions: {
-        marginVertical: 16,
-    },
-    actionButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-    },
-    completedButton: {
-        backgroundColor: '#4CAF50',
-    },
-    incompleteButton: {
-        backgroundColor: '#9E9E9E',
-    },
-    actionButtonText: {
-        color: '#FFFFFF',
-        fontWeight: '600',
-        marginLeft: 8,
-    },
-    centeredView: {
+    modalOverlay: {
         flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
     },
-    modalView: {
-        width: '85%',
-        backgroundColor: 'white',
-        borderRadius: 20,
+    modalContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
         padding: 24,
         alignItems: 'center',
+        width: '80%',
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
     },
-    modalIcon: {
-        marginBottom: 16,
-    },
-    modalTitle: {
+    congratsTitle: {
         fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 8,
+        fontWeight: '700',
         color: '#333',
+        marginTop: 16,
+        marginBottom: 8,
     },
-    modalText: {
-        fontSize: 18,
-        marginBottom: 16,
-        textAlign: 'center',
-        color: '#444',
-    },
-    modalSubText: {
+    congratsText: {
         fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
         marginBottom: 24,
-        textAlign: 'center',
-        color: '#666',
     },
-    modalButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginBottom: 16,
+    closeButton: {
+        backgroundColor: '#4CAF50',
+        paddingVertical: 10,
+        paddingHorizontal: 24,
+        borderRadius: 8,
     },
-    modalButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 12,
-        borderRadius: 10,
-        width: '48%',
-    },
-    cameraButton: {
-        backgroundColor: '#5C6BC0',
-    },
-    galleryButton: {
-        backgroundColor: '#26A69A',
-    },
-    modalButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        marginLeft: 8,
-    },
-    skipButton: {
-        padding: 10,
-    },
-    skipButtonText: {
-        color: '#666',
+    closeButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '600',
         fontSize: 16,
-    },
+    }
 }); 

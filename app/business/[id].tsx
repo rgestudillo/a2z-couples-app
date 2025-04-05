@@ -1,29 +1,64 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Linking, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Linking, Image, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getBusinessById } from '@/api/business';
+import { Business } from '@/model/Business';
+import RefreshableScrollView from '@/components/RefreshableScrollView';
+import { showNetworkRequiredMessage } from '@/utils/showOfflineToast';
 
 export default function BusinessDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const business = id ? getBusinessById(id) : undefined;
+    const [business, setBusiness] = useState<Business | undefined>();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    if (!business) {
-        return (
-            <SafeAreaView style={[styles.container, styles.centerContent]}>
-                <Text style={styles.errorText}>Business not found</Text>
-            </SafeAreaView>
-        );
-    }
+    const fetchBusiness = async () => {
+        if (!id) {
+            setError("Missing business ID");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const businessData = await getBusinessById(id);
+            setBusiness(businessData);
+            if (!businessData) {
+                setError("Business not found");
+            } else {
+                setError(null);
+            }
+        } catch (err) {
+            console.error("Error fetching business:", err);
+            setError("Failed to load business details");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchBusiness();
+    }, [id]);
+
+    const handleRefreshComplete = (success: boolean) => {
+        if (success) {
+            fetchBusiness();
+        }
+    };
 
     const handleCallPress = () => {
-        if (business.phone) {
+        if (business?.phone) {
             Linking.openURL(`tel:${business.phone}`);
         }
     };
 
-    const handleWebsitePress = () => {
-        if (business.website) {
+    const handleWebsitePress = async () => {
+        if (!business?.website) return;
+
+        // Check network before opening external link
+        const canProceed = await showNetworkRequiredMessage("Opening website");
+        if (canProceed) {
             Linking.openURL(business.website);
         }
     };
@@ -47,6 +82,32 @@ export default function BusinessDetailScreen() {
             </View>
         );
     };
+
+    // Loading state
+    if (loading) {
+        return (
+            <SafeAreaView style={[styles.container, styles.centerContent]}>
+                <ActivityIndicator size="large" color="#FF6B81" />
+                <Text style={styles.loadingText}>Loading business details...</Text>
+            </SafeAreaView>
+        );
+    }
+
+    // Error state
+    if (error || !business) {
+        return (
+            <SafeAreaView style={[styles.container, styles.centerContent]}>
+                <Ionicons name="alert-circle-outline" size={48} color="#FF3B30" />
+                <Text style={styles.errorText}>{error || "Business not found"}</Text>
+                <TouchableOpacity
+                    style={styles.retryButton}
+                    onPress={fetchBusiness}
+                >
+                    <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
 
     // Prepare hours data for FlatList if it exists
     const hoursData = Array.isArray(business.hours) ? business.hours : [];
@@ -72,11 +133,11 @@ export default function BusinessDetailScreen() {
             <Text style={styles.description}>{business.description}</Text>
 
             <View style={styles.tagsContainer}>
-                {business.tags.map((tag, index) => (
+                {business.tags?.map((tag, index) => (
                     <View key={index} style={styles.tag}>
                         <Text style={styles.tagText}>{tag}</Text>
                     </View>
-                ))}
+                )) || null}
             </View>
 
             <View style={styles.infoContainer}>
@@ -138,6 +199,11 @@ export default function BusinessDetailScreen() {
                         ListHeaderComponent={renderHeader}
                         ListFooterComponent={renderFooter}
                         contentContainerStyle={styles.content}
+                        refreshControl={
+                            <RefreshableScrollView
+                                onRefreshComplete={handleRefreshComplete}
+                            />
+                        }
                     />
                 ) : (
                     <FlatList
@@ -147,6 +213,11 @@ export default function BusinessDetailScreen() {
                         ListHeaderComponent={renderHeader}
                         ListFooterComponent={renderFooter}
                         contentContainerStyle={styles.content}
+                        refreshControl={
+                            <RefreshableScrollView
+                                onRefreshComplete={handleRefreshComplete}
+                            />
+                        }
                     />
                 )}
             </SafeAreaView>
@@ -162,10 +233,29 @@ const styles = StyleSheet.create({
     centerContent: {
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 20,
     },
     errorText: {
         fontSize: 18,
         color: '#666',
+        marginTop: 12,
+        textAlign: 'center',
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 12,
+    },
+    retryButton: {
+        marginTop: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#FF6B81',
+        borderRadius: 6,
+    },
+    retryButtonText: {
+        color: 'white',
+        fontWeight: '600',
     },
     content: {
         padding: 0,

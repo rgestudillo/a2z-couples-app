@@ -29,14 +29,15 @@ interface IdeasContextType {
         [IdeaType.DATE]: DateIdea[];
         [IdeaType.GIFT]: GiftIdea[];
     };
+    loading: boolean;
     currentCategory: IdeaType;
     setCurrentCategory: (category: IdeaType) => void;
     favoriteIdeas: { [key: string]: string[] };
     addToFavorites: (type: IdeaType, id: string) => void;
     removeFromFavorites: (type: IdeaType, id: string) => void;
-    getIdeasByLetter: (type: IdeaType, letter: string) => (DateIdea | GiftIdea)[];
-    getIdeaById: (type: IdeaType, id: string) => (DateIdea | GiftIdea) | undefined;
-    getFavoriteIdeas: (type: IdeaType) => (DateIdea | GiftIdea)[];
+    getIdeasByLetter: (type: IdeaType, letter: string) => Promise<(DateIdea | GiftIdea)[]>;
+    getIdeaById: (type: IdeaType, id: string) => Promise<(DateIdea | GiftIdea) | undefined>;
+    getFavoriteIdeas: (type: IdeaType) => Promise<(DateIdea | GiftIdea)[]>;
     completedIdeas: { [key: string]: string[] };
     completedBusinesses: string[];
     markIdeaAsCompleted: (type: IdeaType, id: string) => void;
@@ -45,11 +46,13 @@ interface IdeasContextType {
     markBusinessAsIncomplete: (businessId: string) => void;
     isIdeaCompleted: (type: IdeaType, id: string) => boolean;
     isBusinessCompleted: (businessId: string) => boolean;
+    refreshIdeas: () => Promise<void>;
 }
 
 const IdeasContext = createContext<IdeasContextType | undefined>(undefined);
 
 export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [loading, setLoading] = useState(true);
     const [currentCategory, setCurrentCategoryState] = useState<IdeaType>(IdeaType.DATE);
     const [favoriteIdeas, setFavoriteIdeas] = useState<{ [key: string]: string[] }>({
         [IdeaType.DATE]: [],
@@ -60,11 +63,46 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         [IdeaType.GIFT]: []
     });
     const [completedBusinesses, setCompletedBusinesses] = useState<string[]>([]);
+    const [allIdeas, setAllIdeas] = useState<{
+        [IdeaType.DATE]: DateIdea[];
+        [IdeaType.GIFT]: GiftIdea[];
+    }>({
+        [IdeaType.DATE]: [],
+        [IdeaType.GIFT]: []
+    });
 
     // Debug: Log current category state
     useEffect(() => {
         console.log('IdeasContext - Current category changed to:', currentCategory);
     }, [currentCategory]);
+
+    // Load all ideas from Firebase
+    const loadAllIdeas = useCallback(async () => {
+        try {
+            setLoading(true);
+            const dateIdeas = await getAllDateIdeas();
+            const giftIdeas = await getAllGiftIdeas();
+
+            setAllIdeas({
+                [IdeaType.DATE]: dateIdeas,
+                [IdeaType.GIFT]: giftIdeas
+            });
+        } catch (error) {
+            console.error('Error loading ideas:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Function to refresh ideas
+    const refreshIdeas = useCallback(async () => {
+        await loadAllIdeas();
+    }, [loadAllIdeas]);
+
+    // Initial data loading
+    useEffect(() => {
+        loadAllIdeas();
+    }, [loadAllIdeas]);
 
     // Memoized setter function to avoid recreating it on each render
     const setCurrentCategory = useCallback((category: IdeaType) => {
@@ -176,7 +214,7 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }));
     }, []);
 
-    const markBusinessAsCompleted = useCallback((businessId: string) => {
+    const markBusinessAsCompleted = useCallback(async (businessId: string) => {
         // First, add the business to completed businesses
         setCompletedBusinesses((prev) => {
             if (!prev.includes(businessId)) {
@@ -185,39 +223,47 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             return prev;
         });
 
-        // Get the business details to find its related idea
-        const business = getBusinessById(businessId);
-        if (business && business.relatedIdeaIds.length > 0) {
-            const ideaId = business.relatedIdeaIds[0]; // Take the first related idea
+        try {
+            // Get the business details to find its related idea
+            const business = await getBusinessById(businessId);
+            if (business && business.relatedIdeaIds.length > 0) {
+                const ideaId = business.relatedIdeaIds[0]; // Take the first related idea
 
-            // Mark the parent idea as completed as soon as at least one business is completed
-            markIdeaAsCompleted(IdeaType.DATE, ideaId);
+                // Mark the parent idea as completed as soon as at least one business is completed
+                markIdeaAsCompleted(IdeaType.DATE, ideaId);
+            }
+        } catch (error) {
+            console.error('Error marking business as completed:', error);
         }
     }, [completedBusinesses, markIdeaAsCompleted]);
 
-    const markBusinessAsIncomplete = useCallback((businessId: string) => {
+    const markBusinessAsIncomplete = useCallback(async (businessId: string) => {
         // First remove the business from completed businesses
         setCompletedBusinesses((prev) =>
             prev.filter((id) => id !== businessId)
         );
 
-        // Get the business details to find its related idea
-        const business = getBusinessById(businessId);
-        if (business && business.relatedIdeaIds.length > 0) {
-            const ideaId = business.relatedIdeaIds[0]; // Take the first related idea
+        try {
+            // Get the business details to find its related idea
+            const business = await getBusinessById(businessId);
+            if (business && business.relatedIdeaIds.length > 0) {
+                const ideaId = business.relatedIdeaIds[0]; // Take the first related idea
 
-            // Get all businesses related to this idea
-            const relatedBusinesses = getBusinessesByIdeaId(ideaId);
+                // Get all businesses related to this idea
+                const relatedBusinesses = await getBusinessesByIdeaId(ideaId);
 
-            // Check if there are still other completed businesses for this idea
-            const hasCompletedBusinesses = relatedBusinesses.some(
-                (b: Business) => b.id !== businessId && completedBusinesses.includes(b.id)
-            );
+                // Check if there are still other completed businesses for this idea
+                const hasCompletedBusinesses = relatedBusinesses.some(
+                    (b: Business) => b.id !== businessId && completedBusinesses.includes(b.id)
+                );
 
-            // If no other businesses are completed, mark the parent idea as incomplete
-            if (!hasCompletedBusinesses) {
-                markIdeaAsIncomplete(IdeaType.DATE, ideaId);
+                // If no other businesses are completed, mark the parent idea as incomplete
+                if (!hasCompletedBusinesses) {
+                    markIdeaAsIncomplete(IdeaType.DATE, ideaId);
+                }
             }
+        } catch (error) {
+            console.error('Error marking business as incomplete:', error);
         }
     }, [completedBusinesses, markIdeaAsIncomplete]);
 
@@ -229,35 +275,39 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return completedBusinesses.includes(businessId);
     }, [completedBusinesses]);
 
-    const getIdeasByLetter = useCallback((type: IdeaType, letter: string) => {
+    const getIdeasByLetter = useCallback(async (type: IdeaType, letter: string) => {
         if (type === IdeaType.DATE) {
-            return getDateIdeasByLetter(letter);
+            return await getDateIdeasByLetter(letter);
         } else {
-            return getGiftIdeasByLetter(letter);
+            return await getGiftIdeasByLetter(letter);
         }
     }, []);
 
-    const getIdeaById = useCallback((type: IdeaType, id: string) => {
+    const getIdeaById = useCallback(async (type: IdeaType, id: string) => {
         if (type === IdeaType.DATE) {
-            return getDateIdeaById(id);
+            return await getDateIdeaById(id);
         } else {
-            return getGiftIdeaById(id);
+            return await getGiftIdeaById(id);
         }
     }, []);
 
-    const getFavoriteIdeas = useCallback((type: IdeaType) => {
-        const ideas = type === IdeaType.DATE ? getAllDateIdeas() : getAllGiftIdeas();
-        return ideas.filter((idea) => (favoriteIdeas[type] || []).includes(idea.id));
+    const getFavoriteIdeas = useCallback(async (type: IdeaType) => {
+        const favoriteIds = favoriteIdeas[type] || [];
+        if (favoriteIds.length === 0) return [];
+
+        const ideas = type === IdeaType.DATE ?
+            await getAllDateIdeas() :
+            await getAllGiftIdeas();
+
+        return ideas.filter((idea) => favoriteIds.includes(idea.id));
     }, [favoriteIdeas]);
 
     // Debug log on each render
     console.log('IdeasProvider rendering with category:', currentCategory);
 
     const contextValue = {
-        allIdeas: {
-            [IdeaType.DATE]: getAllDateIdeas(),
-            [IdeaType.GIFT]: getAllGiftIdeas()
-        },
+        allIdeas,
+        loading,
         currentCategory,
         setCurrentCategory,
         favoriteIdeas,
@@ -274,6 +324,7 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         markBusinessAsIncomplete,
         isIdeaCompleted,
         isBusinessCompleted,
+        refreshIdeas,
     };
 
     return (

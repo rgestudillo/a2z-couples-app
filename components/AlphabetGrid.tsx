@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useIdeas, IdeaType } from '../context/IdeasContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,14 +7,28 @@ import { Ionicons } from '@expo/vector-icons';
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const AlphabetGrid: React.FC = () => {
-    const { allIdeas, currentCategory, completedIdeas } = useIdeas();
+    const { allIdeas, currentCategory, completedIdeas, loading } = useIdeas();
     const ideas = allIdeas[currentCategory];
 
+    // Check if the grid has loaded ideas
+    const [isReady, setIsReady] = useState(false);
+
+    // Update ready state when ideas are loaded
+    useEffect(() => {
+        if (!loading && ideas && ideas.length > 0) {
+            setIsReady(true);
+        } else {
+            setIsReady(false);
+        }
+    }, [loading, ideas]);
+
     const getIdeaCountForLetter = (letter: string): number => {
+        if (!ideas) return 0;
         return ideas.filter(idea => idea.letter === letter).length;
     };
 
     const hasCompletedIdeasForLetter = (letter: string): boolean => {
+        if (!ideas) return false;
         const ideasForLetter = ideas.filter(idea => idea.letter === letter);
         return ideasForLetter.some(idea =>
             (completedIdeas[currentCategory] || []).includes(idea.id)
@@ -79,6 +93,16 @@ const AlphabetGrid: React.FC = () => {
         );
     };
 
+    // Render loading state
+    if (loading) {
+        return (
+            <View style={[styles.container, styles.centerContent]}>
+                <ActivityIndicator size="large" color={getLetterColor()} />
+                <Text style={styles.loadingText}>Loading ideas...</Text>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -108,6 +132,15 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
         backgroundColor: '#FFF8F9',
+    },
+    centerContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 16,
     },
     header: {
         flexDirection: 'row',
