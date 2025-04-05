@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MemoriesGallery } from '@/components/memories';
 import { getProductsByGiftId } from '@/api/product';
 import { Product } from '@/model/Product';
+import Confetti from 'react-native-confetti';
 
 interface ProductCardProps {
     product: Product;
@@ -69,6 +70,13 @@ export default function IdeaDetailScreen() {
     const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
     const [isLoadingRelated, setIsLoadingRelated] = useState(true);
 
+    // New states for modal and images
+    const [congratsModalVisible, setCongratsModalVisible] = useState(false);
+    const [attachedImages, setAttachedImages] = useState<string[]>([]);
+
+    // Confetti reference
+    const confettiRef = React.useRef<Confetti>(null);
+
     // Load idea and related data
     useEffect(() => {
         async function loadData() {
@@ -99,10 +107,6 @@ export default function IdeaDetailScreen() {
 
         loadData();
     }, [id, ideaType, getIdeaById]);
-
-    // New states for modal and images
-    const [congratsModalVisible, setCongratsModalVisible] = useState(false);
-    const [attachedImages, setAttachedImages] = useState<string[]>([]);
 
     // Load attached images from AsyncStorage
     useEffect(() => {
@@ -169,6 +173,17 @@ export default function IdeaDetailScreen() {
         if (!isCompleted) {
             markIdeaAsCompleted(ideaType, idea.id);
             setCongratsModalVisible(true);
+            // Start confetti animation
+            if (confettiRef.current) {
+                confettiRef.current.startConfetti();
+
+                // Stop confetti after a few seconds
+                setTimeout(() => {
+                    if (confettiRef.current) {
+                        confettiRef.current.stopConfetti();
+                    }
+                }, 5000);
+            }
         } else {
             markIdeaAsIncomplete(ideaType, idea.id);
         }
@@ -377,25 +392,103 @@ export default function IdeaDetailScreen() {
                 />
             )}
 
-            {/* Congrats Modal */}
+            {/* Confetti component */}
+            <Confetti ref={confettiRef} />
+
+            {/* Congratulations Modal */}
             <Modal
-                animationType="fade"
+                animationType="slide"
                 transparent={true}
                 visible={congratsModalVisible}
                 onRequestClose={() => setCongratsModalVisible(false)}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
-                        <Ionicons name="checkmark-circle" size={60} color="#4CAF50" />
-                        <Text style={styles.congratsTitle}>Congratulations!</Text>
-                        <Text style={styles.congratsText}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Ionicons name="checkmark-circle" size={60} color="#4CAF50" style={styles.modalIcon} />
+                        <Text style={styles.modalTitle}>Congratulations!</Text>
+                        <Text style={styles.modalText}>
                             You've completed this {ideaType === IdeaType.DATE ? 'date' : 'gift'} idea!
                         </Text>
+                        <Text style={styles.modalSubText}>Would you like to add some photos to remember this moment?</Text>
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cameraButton]}
+                                onPress={async () => {
+                                    // First check camera permissions
+                                    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+                                    if (status !== 'granted') {
+                                        Alert.alert('Permission needed', 'We need camera permission to take photos');
+                                        return;
+                                    }
+
+                                    // Hide modal first
+                                    setCongratsModalVisible(false);
+
+                                    // Need to wait for modal to fully close before camera can open
+                                    setTimeout(async () => {
+                                        try {
+                                            const result = await ImagePicker.launchCameraAsync({
+                                                allowsEditing: false,
+                                                quality: 0.8,
+                                            });
+
+                                            if (!result.canceled && result.assets && result.assets.length > 0) {
+                                                const newImages = [...attachedImages, result.assets[0].uri];
+                                                setAttachedImages(newImages);
+                                                saveAttachedImages(newImages);
+                                            }
+                                        } catch (error) {
+                                            console.error('Error taking photo:', error);
+                                            Alert.alert('Error', 'Failed to take photo. Please try again.');
+                                        }
+                                    }, 800); // Increased timeout to ensure modal is fully closed
+                                }}
+                            >
+                                <Ionicons name="camera" size={24} color="#fff" />
+                                <Text style={styles.modalButtonText}>Take Photo</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.galleryButton]}
+                                onPress={() => {
+                                    // Hide modal first
+                                    setCongratsModalVisible(false);
+
+                                    // Need to wait for modal to fully close before picker can open
+                                    setTimeout(async () => {
+                                        try {
+                                            const result = await ImagePicker.launchImageLibraryAsync({
+                                                allowsEditing: false,
+                                                quality: 0.8,
+                                                allowsMultipleSelection: true,
+                                                selectionLimit: 10,
+                                            });
+
+                                            if (!result.canceled && result.assets && result.assets.length > 0) {
+                                                const newImageUris = result.assets.map(asset => asset.uri);
+                                                const newImages = [...attachedImages, ...newImageUris];
+                                                setAttachedImages(newImages);
+                                                saveAttachedImages(newImages);
+                                            }
+                                        } catch (error) {
+                                            console.error('Error picking image:', error);
+                                            Alert.alert('Error', 'Failed to pick image. Please try again.');
+                                        }
+                                    }, 800); // Increased timeout to ensure modal is fully closed
+                                }}
+                            >
+                                <Ionicons name="images" size={24} color="#fff" />
+                                <Text style={styles.modalButtonText}>Gallery</Text>
+                            </TouchableOpacity>
+                        </View>
+
                         <TouchableOpacity
-                            style={styles.closeButton}
+                            style={styles.skipButton}
                             onPress={() => setCongratsModalVisible(false)}
                         >
-                            <Text style={styles.closeButtonText}>Close</Text>
+                            <Text style={styles.skipButtonText}>Skip for now</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -667,28 +760,80 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
     },
-    congratsTitle: {
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalView: {
+        width: '85%',
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 24,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalIcon: {
+        marginBottom: 10,
+    },
+    modalTitle: {
         fontSize: 24,
         fontWeight: '700',
         color: '#333',
-        marginTop: 16,
         marginBottom: 8,
     },
-    congratsText: {
+    modalText: {
         fontSize: 16,
         color: '#666',
         textAlign: 'center',
-        marginBottom: 24,
+        marginBottom: 12,
     },
-    closeButton: {
-        backgroundColor: '#4CAF50',
-        paddingVertical: 10,
-        paddingHorizontal: 24,
-        borderRadius: 8,
+    modalSubText: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 20,
     },
-    closeButtonText: {
-        color: '#FFFFFF',
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: 16,
+    },
+    modalButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        flex: 0.48,
+    },
+    cameraButton: {
+        backgroundColor: '#FF6B81',
+    },
+    galleryButton: {
+        backgroundColor: '#7986CB',
+    },
+    modalButtonText: {
+        color: '#fff',
         fontWeight: '600',
-        fontSize: 16,
-    }
+        fontSize: 14,
+        marginLeft: 8,
+    },
+    skipButton: {
+        padding: 10,
+    },
+    skipButtonText: {
+        color: '#999',
+        fontSize: 14,
+    },
 }); 
