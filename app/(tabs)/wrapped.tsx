@@ -6,6 +6,7 @@ import { useIdeas, IdeaType } from '@/context/IdeasContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DateIdea } from '@/model/DateIdea';
 import { GiftIdea } from '@/model/GiftIdea';
+import CategorySelector from '@/components/CategorySelector';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const { width } = Dimensions.get('window');
@@ -119,12 +120,6 @@ export default function WrappedScreen() {
 
     const { completedLetters, totalAvailableLetters, completedPercent } = getCompletionData();
 
-    const handleTabChange = (tab: IdeaType) => {
-        setActiveTab(tab);
-        setCurrentCategory(tab);
-        setShowFavorites(false);
-    };
-
     const toggleFavorites = () => {
         setShowFavorites(!showFavorites);
     };
@@ -149,8 +144,20 @@ export default function WrappedScreen() {
             <View style={styles.alphabetProgressContainer}>
                 <View style={styles.progressHeader}>
                     <Text style={styles.progressTitle}>Your A-Z Progress</Text>
-                    <View style={styles.progressBadge}>
-                        <Text style={styles.progressBadgeText}>{completedPercent}%</Text>
+                    <View style={styles.progressActions}>
+                        <View style={styles.progressBadge}>
+                            <Text style={styles.progressBadgeText}>{completedPercent}%</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.favoriteButton}
+                            onPress={toggleFavorites}
+                        >
+                            <Ionicons
+                                name={showFavorites ? "heart" : "heart-outline"}
+                                size={26}
+                                color={showFavorites ? "#FF6B81" : "#666"}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -331,55 +338,8 @@ export default function WrappedScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.tabsContainer}>
-                <View style={styles.headerContainer}>
-                    <View style={styles.tabButtonsContainer}>
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === IdeaType.DATE && styles.activeTab]}
-                            onPress={() => handleTabChange(IdeaType.DATE)}
-                        >
-                            <Ionicons
-                                name="calendar"
-                                size={22}
-                                color={activeTab === IdeaType.DATE ? '#ff6b6b' : '#666'}
-                            />
-                            <Text style={[
-                                styles.tabText,
-                                activeTab === IdeaType.DATE && styles.activeTabText
-                            ]}>
-                                Date Ideas
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === IdeaType.GIFT && styles.activeTab]}
-                            onPress={() => handleTabChange(IdeaType.GIFT)}
-                        >
-                            <Ionicons
-                                name="gift"
-                                size={22}
-                                color={activeTab === IdeaType.GIFT ? '#7986CB' : '#666'}
-                            />
-                            <Text style={[
-                                styles.tabText,
-                                activeTab === IdeaType.GIFT && styles.activeTabText
-                            ]}>
-                                Gift Ideas
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <TouchableOpacity
-                        style={styles.favoriteButton}
-                        onPress={toggleFavorites}
-                    >
-                        <Ionicons
-                            name={showFavorites ? "heart" : "heart-outline"}
-                            size={26}
-                            color={showFavorites ? "#FF6B81" : "#666"}
-                        />
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.selectorContainer}>
+                <CategorySelector containerStyle={styles.categorySelectorStyle} />
             </View>
 
             <ScrollView
@@ -465,51 +425,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f7f7f7',
     },
-    tabsContainer: {
-        backgroundColor: '#fff',
-        paddingVertical: 12,
-        marginBottom: 10,
+    selectorContainer: {
+        paddingTop: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
         shadowRadius: 1,
         elevation: 1,
     },
-    headerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-    },
-    tabButtonsContainer: {
-        flexDirection: 'row',
-        flex: 1,
-    },
-    favoriteButton: {
-        padding: 8,
-        marginLeft: 8,
-    },
-    tab: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 8,
-        borderBottomWidth: 2,
-        borderBottomColor: 'transparent',
-    },
-    activeTab: {
-        borderBottomColor: '#ff6b6b',
-    },
-    tabText: {
-        marginLeft: 8,
-        fontSize: 16,
-        color: '#666',
-        fontWeight: '500',
-    },
-    activeTabText: {
-        color: '#ff6b6b',
-        fontWeight: '600',
+    categorySelectorStyle: {
+        marginTop: 0,
+        marginBottom: 4,
     },
     scrollContent: {
         padding: 16,
@@ -536,16 +462,24 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#333',
     },
+    progressActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     progressBadge: {
         backgroundColor: '#4CAF50',
         borderRadius: 12,
         paddingHorizontal: 8,
         paddingVertical: 4,
+        marginRight: 12,
     },
     progressBadgeText: {
         color: '#fff',
         fontWeight: '700',
         fontSize: 12,
+    },
+    favoriteButton: {
+        padding: 4,
     },
     letterGrid: {
         flexDirection: 'row',

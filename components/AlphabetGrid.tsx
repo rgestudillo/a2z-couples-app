@@ -105,17 +105,6 @@ const AlphabetGrid: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Ionicons
-                    name={currentCategory === IdeaType.DATE ? "heart-circle" : "gift"}
-                    size={24}
-                    color={getLetterColor()}
-                />
-                <Text style={[styles.headerText, { color: getLetterColor() }]}>
-                    Browse {currentCategory === IdeaType.DATE ? "Date" : "Gift"} Ideas
-                </Text>
-            </View>
-
             <FlatList
                 data={ALPHABET}
                 renderItem={renderItem}
@@ -130,7 +119,6 @@ const AlphabetGrid: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
         backgroundColor: '#FFF8F9',
     },
     centerContent: {
@@ -141,53 +129,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#666',
         marginTop: 16,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 16,
-        paddingVertical: 10,
-        backgroundColor: 'white',
-        borderRadius: 16,
-        shadowColor: '#ffb8c6',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    headerText: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginLeft: 10,
-    },
-    legend: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginBottom: 16,
-        backgroundColor: 'white',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 10,
-    },
-    legendItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginHorizontal: 10,
-    },
-    legendColorBox: {
-        width: 12,
-        height: 12,
-        borderRadius: 3,
-        backgroundColor: '#FF6B81',
-        marginRight: 5,
-    },
-    legendCompleted: {
-        backgroundColor: '#4CAF50',
-    },
-    legendText: {
-        fontSize: 12,
-        color: '#666',
     },
     grid: {
         paddingVertical: 8,

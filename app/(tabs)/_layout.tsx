@@ -1,6 +1,22 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Platform, View, Text } from 'react-native';
+
+// Custom header title component with icon
+const CustomHeaderTitle = ({ title, icon }: { title: string, icon?: string }) => (
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    {icon && <Ionicons name={icon as any} size={26} color="#ff6b6b" style={{ marginRight: 10 }} />}
+    <Text style={{
+      fontSize: 26,
+      fontWeight: '800',
+      color: '#333',
+      letterSpacing: -0.5
+    }}>
+      {title}
+    </Text>
+  </View>
+);
 
 export default function TabLayout() {
   return (
@@ -10,18 +26,43 @@ export default function TabLayout() {
         tabBarInactiveTintColor: '#999',
         tabBarLabelStyle: {
           fontSize: 12,
+          fontWeight: '500',
         },
         tabBarStyle: {
           height: 65,
           paddingVertical: 20,
+          borderTopWidth: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3,
+          elevation: 5,
+          backgroundColor: '#ffffff',
         },
         headerStyle: {
           backgroundColor: '#ffffff',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+          elevation: 3,
+          height: 110,
+          borderBottomWidth: 0,
         },
         headerTitleStyle: {
-          fontWeight: '600',
-          fontSize: 18,
+          fontWeight: '800',
+          fontSize: 26,
+          color: '#333',
+          letterSpacing: -0.5,
         },
+        headerTitleAlign: 'left',
+        headerLeftContainerStyle: {
+          paddingLeft: 20,
+        },
+        headerRightContainerStyle: {
+          paddingRight: 20,
+        },
+        headerShadowVisible: false,
       }}
     >
       <Tabs.Screen
@@ -31,7 +72,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
-          headerTitle: 'A2Z Ideas',
+          headerTitle: () => <CustomHeaderTitle title="A2Z Ideas" icon="heart" />,
         }}
       />
       <Tabs.Screen
@@ -41,7 +82,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid" size={size} color={color} />
           ),
-          headerTitle: 'Browse by Letter',
+          headerTitle: () => <CustomHeaderTitle title="Browse by Letter" icon="grid" />,
         }}
       />
       <Tabs.Screen
@@ -51,7 +92,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="search" size={size} color={color} />
           ),
-          headerShown: false,
+          headerTitle: () => <CustomHeaderTitle title="Find Places or Products" icon="search" />,
         }}
       />
       <Tabs.Screen
@@ -61,7 +102,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="albums" size={size} color={color} />
           ),
-          headerTitle: 'Your Ideas Wrapped',
+          headerTitle: () => <CustomHeaderTitle title="Your Ideas Wrapped" icon="gift" />,
         }}
       />
       <Tabs.Screen
@@ -71,7 +112,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),
-          headerTitle: 'Settings',
+          headerTitle: () => <CustomHeaderTitle title="Settings" icon="cog" />,
         }}
       />
     </Tabs>

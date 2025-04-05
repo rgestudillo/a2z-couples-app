@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { getAllBusinesses } from '@/api/business';
 import { getAllProducts } from '@/api/product';
 import { Business } from '@/model/Business';
@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIdeas, IdeaType } from '@/context/IdeasContext';
 import ProductCard from '@/components/ProductCard';
 import { useFocusEffect } from 'expo-router';
+import CategorySelector from '@/components/CategorySelector';
 
 // Define browse sections
 enum BrowseSection {
@@ -21,7 +22,7 @@ const BrowseScreen = () => {
     const [businesses, setBusinesses] = useState<Business[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const { currentCategory, setCurrentCategory, refreshIdeas } = useIdeas();
+    const { currentCategory, refreshIdeas } = useIdeas();
     const [activeSection, setActiveSection] = useState<BrowseSection>(
         currentCategory === IdeaType.DATE ? BrowseSection.PLACES : BrowseSection.PRODUCTS
     );
@@ -33,19 +34,6 @@ const BrowseScreen = () => {
             return () => { };
         }, [])
     );
-
-    // Handle section changes
-    const handleSectionChange = (section: BrowseSection) => {
-        setActiveSection(section);
-        // Update category based on section
-        if (section === BrowseSection.PLACES && currentCategory !== IdeaType.DATE) {
-            console.log('Setting category to DATE for Places section');
-            setCurrentCategory(IdeaType.DATE);
-        } else if (section === BrowseSection.PRODUCTS && currentCategory !== IdeaType.GIFT) {
-            console.log('Setting category to GIFT for Products section');
-            setCurrentCategory(IdeaType.GIFT);
-        }
-    };
 
     // Load data from Firebase
     const loadData = async () => {
@@ -120,58 +108,15 @@ const BrowseScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Browse</Text>
-                <Text style={styles.headerSubtitle}>
-                    Find {activeSection === BrowseSection.PLACES ? "date spots" : "gift ideas"}
-                </Text>
-            </View>
-
-            {/* Section Selector */}
-            <View style={styles.sectionSelector}>
-                <TouchableOpacity
-                    style={[
-                        styles.sectionTab,
-                        activeSection === BrowseSection.PLACES && styles.activePlacesTab
-                    ]}
-                    onPress={() => handleSectionChange(BrowseSection.PLACES)}
-                >
-                    <Ionicons
-                        name="business-outline"
-                        size={22}
-                        color={activeSection === BrowseSection.PLACES ? '#fff' : '#666'}
-                    />
-                    <Text
-                        style={[
-                            styles.sectionText,
-                            activeSection === BrowseSection.PLACES && styles.activeSectionText
-                        ]}
-                    >
-                        Places
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[
-                        styles.sectionTab,
-                        activeSection === BrowseSection.PRODUCTS && styles.activeProductsTab
-                    ]}
-                    onPress={() => handleSectionChange(BrowseSection.PRODUCTS)}
-                >
-                    <Ionicons
-                        name="gift-outline"
-                        size={22}
-                        color={activeSection === BrowseSection.PRODUCTS ? '#fff' : '#666'}
-                    />
-                    <Text
-                        style={[
-                            styles.sectionText,
-                            activeSection === BrowseSection.PRODUCTS && styles.activeSectionText
-                        ]}
-                    >
-                        Products
-                    </Text>
-                </TouchableOpacity>
+            {/* Category Selector with Places/Products labels */}
+            <View style={styles.selectorContainer}>
+                <CategorySelector
+                    dateLabel="Places"
+                    giftLabel="Products"
+                    dateIcon="business-outline"
+                    giftIcon="gift-outline"
+                    containerStyle={styles.categorySelectorStyle}
+                />
             </View>
 
             <View style={styles.searchContainer}>
@@ -233,53 +178,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFF8F9',
     },
-    header: {
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 12,
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: '700',
-        color: '#444',
-        marginBottom: 4,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: '#888',
-    },
-    sectionSelector: {
-        flexDirection: 'row',
-        paddingHorizontal: 20,
-        marginVertical: 12,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 18,
-        padding: 4,
-        marginHorizontal: 20,
-    },
-    sectionTab: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        flex: 1,
-    },
-    activePlacesTab: {
-        backgroundColor: '#FF6B81',
-    },
-    activeProductsTab: {
-        backgroundColor: '#7986CB',
-    },
-    sectionText: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#555',
-        marginLeft: 8,
-    },
-    activeSectionText: {
-        color: '#fff',
+    selectorContainer: {
+        paddingTop: 8,
     },
     searchContainer: {
         flexDirection: 'row',
@@ -346,6 +246,9 @@ const styles = StyleSheet.create({
         marginTop: 12,
         fontSize: 16,
         color: '#666',
+    },
+    categorySelectorStyle: {
+        marginTop: 0,
     },
 });
 

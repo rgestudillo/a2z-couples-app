@@ -59,7 +59,9 @@ export default function HomeScreen() {
       </View>
 
       {/* Category Selector with simplified design */}
-      <CategorySelector />
+      <View style={styles.categorySelectorContainer}>
+        <CategorySelector containerStyle={styles.categorySelectorStyle} />
+      </View>
 
       {/* Quick Action Buttons in cute card style */}
       <View style={styles.quickActionsContainer}>
@@ -245,5 +247,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     marginTop: 16,
+  },
+  categorySelectorContainer: {
+    paddingTop: 0,
+  },
+  categorySelectorStyle: {
+    marginTop: 0,
+    marginBottom: 12,
   },
 });

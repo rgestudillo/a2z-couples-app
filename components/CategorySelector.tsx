@@ -9,13 +9,27 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { IdeaType, useIdeas } from '@/context/IdeasContext';
 
-const CategorySelector: React.FC = () => {
+interface CategorySelectorProps {
+    dateLabel?: string;
+    giftLabel?: string;
+    dateIcon?: string;
+    giftIcon?: string;
+    containerStyle?: object;
+}
+
+const CategorySelector: React.FC<CategorySelectorProps> = ({
+    dateLabel = "Date Ideas",
+    giftLabel = "Gift Ideas",
+    dateIcon = "heart",
+    giftIcon = "gift",
+    containerStyle = {}
+}) => {
     const { currentCategory, setCurrentCategory } = useIdeas();
 
     console.log('CategorySelector rendering with category:', currentCategory);
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, containerStyle]}>
             {/* <Text style={styles.heading}>Choose your adventure</Text> */}
             <View style={styles.categoryContainer}>
                 <TouchableOpacity
@@ -30,7 +44,7 @@ const CategorySelector: React.FC = () => {
                 >
                     <View style={styles.iconContainer}>
                         <Ionicons
-                            name="heart"
+                            name={dateIcon as any}
                             size={24}
                             color={currentCategory === IdeaType.DATE ? '#fff' : '#FF6B81'}
                         />
@@ -41,7 +55,7 @@ const CategorySelector: React.FC = () => {
                             currentCategory === IdeaType.DATE && styles.activeCategoryText
                         ]}
                     >
-                        Date Ideas
+                        {dateLabel}
                     </Text>
                 </TouchableOpacity>
 
@@ -57,7 +71,7 @@ const CategorySelector: React.FC = () => {
                 >
                     <View style={styles.iconContainer}>
                         <Ionicons
-                            name="gift"
+                            name={giftIcon as any}
                             size={24}
                             color={currentCategory === IdeaType.GIFT ? '#fff' : '#7986CB'}
                         />
@@ -68,7 +82,7 @@ const CategorySelector: React.FC = () => {
                             currentCategory === IdeaType.GIFT && styles.activeCategoryText
                         ]}
                     >
-                        Gift Ideas
+                        {giftLabel}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -78,7 +92,7 @@ const CategorySelector: React.FC = () => {
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 24,
+        marginVertical: 12,
         paddingHorizontal: 16,
     },
     heading: {
