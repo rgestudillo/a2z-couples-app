@@ -19,18 +19,23 @@ const CustomHeaderTitle = ({ title, icon }: { title: string, icon?: string }) =>
 );
 
 export default function TabLayout() {
+  // Calculate bottom padding based on platform
+  const tabBarBottomPadding = Platform.OS === 'ios' ? 30 : 22;
+
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#ff6b6b',
         tabBarInactiveTintColor: '#999',
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '500',
+          marginBottom: 4,
         },
         tabBarStyle: {
-          height: 65,
-          paddingVertical: 20,
+          height: 80,
+          paddingTop: 8,
+          paddingBottom: tabBarBottomPadding,
           borderTopWidth: 0,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
@@ -38,6 +43,9 @@ export default function TabLayout() {
           shadowRadius: 3,
           elevation: 5,
           backgroundColor: '#ffffff',
+        },
+        tabBarIconStyle: {
+          marginBottom: -4,
         },
         headerStyle: {
           backgroundColor: '#ffffff',
@@ -70,7 +78,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="home" size={size - 2} color={color} />
           ),
           headerTitle: () => <CustomHeaderTitle title="A2Z Ideas" icon="heart" />,
         }}
@@ -80,7 +88,7 @@ export default function TabLayout() {
         options={{
           title: 'A-Z',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid" size={size} color={color} />
+            <Ionicons name="grid" size={size - 2} color={color} />
           ),
           headerTitle: () => <CustomHeaderTitle title="Browse by Letter" icon="grid" />,
         }}
@@ -90,7 +98,7 @@ export default function TabLayout() {
         options={{
           title: 'Browse',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
+            <Ionicons name="search" size={size - 2} color={color} />
           ),
           headerTitle: () => <CustomHeaderTitle title="Find Places or Products" icon="search" />,
         }}
@@ -100,7 +108,7 @@ export default function TabLayout() {
         options={{
           title: 'Wrapped',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="albums" size={size} color={color} />
+            <Ionicons name="albums" size={size - 2} color={color} />
           ),
           headerTitle: () => <CustomHeaderTitle title="Your Ideas Wrapped" icon="gift" />,
         }}
@@ -110,7 +118,7 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
+            <Ionicons name="settings-outline" size={size - 2} color={color} />
           ),
           headerTitle: () => <CustomHeaderTitle title="Settings" icon="cog" />,
         }}

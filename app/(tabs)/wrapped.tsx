@@ -142,25 +142,6 @@ export default function WrappedScreen() {
     const renderAlphabetProgress = () => {
         return (
             <View style={styles.alphabetProgressContainer}>
-                <View style={styles.progressHeader}>
-                    <Text style={styles.progressTitle}>Your A-Z Progress</Text>
-                    <View style={styles.progressActions}>
-                        <View style={styles.progressBadge}>
-                            <Text style={styles.progressBadgeText}>{completedPercent}%</Text>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.favoriteButton}
-                            onPress={toggleFavorites}
-                        >
-                            <Ionicons
-                                name={showFavorites ? "heart" : "heart-outline"}
-                                size={26}
-                                color={showFavorites ? "#FF6B81" : "#666"}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
                 <View style={styles.letterGrid}>
                     {ALPHABET.map((letter) => {
                         const hasIdeasForLetter = allIdeas[activeTab].some(idea => idea.letter === letter);
@@ -306,7 +287,6 @@ export default function WrappedScreen() {
 
         return (
             <View style={styles.favoritesContainer}>
-                <Text style={styles.sectionTitle}>Your Favorites</Text>
                 {favoriteIdeasList.map(idea => (
                     <IdeaCard
                         key={idea.id}
@@ -346,6 +326,40 @@ export default function WrappedScreen() {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
+                <View style={styles.headerRow}>
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.headerTitle}>
+                            {showFavorites ? "Favorites" : "A-Z Progress"}
+                        </Text>
+                        {!showFavorites && (
+                            <View style={styles.progressBadge}>
+                                <Text style={styles.progressBadgeText}>{completedPercent}%</Text>
+                            </View>
+                        )}
+                    </View>
+
+                    <View style={styles.viewToggle}>
+                        <TouchableOpacity
+                            style={[
+                                styles.toggleOption,
+                                !showFavorites && styles.activeToggleOption
+                            ]}
+                            onPress={() => setShowFavorites(false)}
+                        >
+                            <Ionicons name="analytics" size={20} color={!showFavorites ? "#FF6B81" : "#AAA"} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.toggleOption,
+                                showFavorites && styles.activeToggleOption
+                            ]}
+                            onPress={() => setShowFavorites(true)}
+                        >
+                            <Ionicons name="heart" size={20} color={showFavorites ? "#FF6B81" : "#AAA"} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
                 {showFavorites ? (
                     renderFavorites()
                 ) : (
@@ -437,6 +451,37 @@ const styles = StyleSheet.create({
         marginTop: 0,
         marginBottom: 4,
     },
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+        marginRight: 8,
+    },
+    viewToggle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        borderRadius: 20,
+        padding: 4,
+    },
+    toggleOption: {
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 16,
+    },
+    activeToggleOption: {
+        backgroundColor: '#FFF0F3',
+    },
     scrollContent: {
         padding: 16,
     },
@@ -450,36 +495,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2,
-    },
-    progressHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    progressTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#333',
-    },
-    progressActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    progressBadge: {
-        backgroundColor: '#4CAF50',
-        borderRadius: 12,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        marginRight: 12,
-    },
-    progressBadgeText: {
-        color: '#fff',
-        fontWeight: '700',
-        fontSize: 12,
-    },
-    favoriteButton: {
-        padding: 4,
     },
     letterGrid: {
         flexDirection: 'row',
@@ -791,5 +806,16 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 180,
         borderRadius: 8,
-    }
+    },
+    progressBadge: {
+        backgroundColor: '#4CAF50',
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+    },
+    progressBadgeText: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 12,
+    },
 }); 
