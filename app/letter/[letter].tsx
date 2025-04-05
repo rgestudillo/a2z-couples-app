@@ -3,15 +3,21 @@ import { View, Text, StyleSheet, FlatList, SafeAreaView, ActivityIndicator, Stat
 import { useLocalSearchParams } from 'expo-router';
 import IdeaCard from '@/components/IdeaCard';
 import { useIdeas, IdeaType, DateIdea, GiftIdea } from '@/context/IdeasContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function LetterIdeasScreen() {
     const { letter, category } = useLocalSearchParams<{ letter: string, category: string }>();
-    const { getIdeasByLetter, currentCategory } = useIdeas();
+    const { getIdeasByLetter, currentCategory, allIdeas } = useIdeas();
     const [ideas, setIdeas] = useState<(DateIdea | GiftIdea)[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Use the category from params or fall back to current category
     const ideaType = category ? category as IdeaType : currentCategory;
+
+    // Get theme color based on the category
+    const getThemeColor = () => {
+        return ideaType === IdeaType.DATE ? '#FF6B81' : '#7986CB';
+    };
 
     // Load ideas when component mounts or when letter/category changes
     useEffect(() => {
@@ -19,8 +25,21 @@ export default function LetterIdeasScreen() {
             setLoading(true);
             try {
                 if (letter) {
-                    const ideasData = await getIdeasByLetter(ideaType, letter);
-                    setIdeas(ideasData || []);
+                    // Special case for ALL - get all ideas
+                    if (letter === 'ALL') {
+                        // Sort alphabetically by title for ALL
+                        const sortedIdeas = [...allIdeas[ideaType]].sort((a, b) =>
+                            a.title.localeCompare(b.title)
+                        );
+                        setIdeas(sortedIdeas || []);
+                    } else {
+                        const ideasData = await getIdeasByLetter(ideaType, letter);
+                        // Sort alphabetically by title
+                        const sortedIdeas = [...ideasData].sort((a, b) =>
+                            a.title.localeCompare(b.title)
+                        );
+                        setIdeas(sortedIdeas || []);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading ideas:', error);
@@ -31,7 +50,7 @@ export default function LetterIdeasScreen() {
         }
 
         loadIdeas();
-    }, [letter, ideaType, getIdeasByLetter]);
+    }, [letter, ideaType, getIdeasByLetter, allIdeas]);
 
     // Render loading state
     if (loading) {
@@ -39,12 +58,21 @@ export default function LetterIdeasScreen() {
             <SafeAreaView style={styles.container}>
                 <StatusBar barStyle="dark-content" />
                 <View style={styles.letterBadgeContainer}>
-                    <View style={styles.letterBadge}>
-                        <Text style={styles.letterText}>{letter?.toUpperCase()}</Text>
+                    <View style={[
+                        styles.letterBadge,
+                        letter === 'ALL' && { backgroundColor: getThemeColor() }
+                    ]}>
+                        {letter === 'ALL' ? (
+                            <Ionicons name="apps" size={32} color="#FFFFFF" />
+                        ) : (
+                            <Text style={styles.letterText}>
+                                {letter?.toUpperCase()}
+                            </Text>
+                        )}
                     </View>
                 </View>
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#ff6b6b" />
+                    <ActivityIndicator size="large" color={getThemeColor()} />
                     <Text style={styles.loadingText}>Loading ideas...</Text>
                 </View>
             </SafeAreaView>
@@ -54,17 +82,35 @@ export default function LetterIdeasScreen() {
     // Render the list header with letter badge
     const renderHeader = () => (
         <View style={styles.listHeader}>
-            <View style={styles.letterBadge}>
-                <Text style={styles.letterText}>{letter?.toUpperCase()}</Text>
+            <View style={[
+                styles.letterBadge,
+                letter === 'ALL' && { backgroundColor: getThemeColor() }
+            ]}>
+                {letter === 'ALL' ? (
+                    <Ionicons name="apps" size={32} color="#FFFFFF" />
+                ) : (
+                    <Text style={styles.letterText}>
+                        {letter?.toUpperCase()}
+                    </Text>
+                )}
             </View>
+            {letter === 'ALL' && (
+                <Text style={[styles.allSubtitle, { color: getThemeColor() }]}>
+                    Browse all ideas
+                </Text>
+            )}
         </View>
     );
 
     // Render empty state
     const renderEmptyComponent = () => (
         <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No ideas found for this letter.</Text>
-            <Text style={styles.emptySubtext}>Try another letter!</Text>
+            <Text style={styles.emptyText}>
+                {letter === 'ALL' ? 'No ideas found.' : 'No ideas found for this letter.'}
+            </Text>
+            <Text style={styles.emptySubtext}>
+                {letter === 'ALL' ? 'Try changing categories!' : 'Try another letter!'}
+            </Text>
         </View>
     );
 
@@ -121,6 +167,11 @@ const styles = StyleSheet.create({
         fontSize: 36,
         fontWeight: '700',
         color: '#fff',
+    },
+    allSubtitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginTop: 8,
     },
     listContent: {
         paddingHorizontal: 16,

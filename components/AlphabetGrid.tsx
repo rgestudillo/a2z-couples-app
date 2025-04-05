@@ -5,6 +5,8 @@ import { useIdeas, IdeaType } from '../context/IdeasContext';
 import { Ionicons } from '@expo/vector-icons';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+// Include ALL as a special option at the beginning
+const GRID_DATA = ['ALL', ...ALPHABET];
 
 const AlphabetGrid: React.FC = () => {
     const { allIdeas, currentCategory, completedIdeas, loading } = useIdeas();
@@ -24,11 +26,25 @@ const AlphabetGrid: React.FC = () => {
 
     const getIdeaCountForLetter = (letter: string): number => {
         if (!ideas) return 0;
+
+        // If "ALL", return the total count of all ideas
+        if (letter === 'ALL') {
+            return ideas.length;
+        }
+
         return ideas.filter(idea => idea.letter === letter).length;
     };
 
     const hasCompletedIdeasForLetter = (letter: string): boolean => {
         if (!ideas) return false;
+
+        // If "ALL", check if any ideas are completed
+        if (letter === 'ALL') {
+            return ideas.some(idea =>
+                (completedIdeas[currentCategory] || []).includes(idea.id)
+            );
+        }
+
         const ideasForLetter = ideas.filter(idea => idea.letter === letter);
         return ideasForLetter.some(idea =>
             (completedIdeas[currentCategory] || []).includes(idea.id)
@@ -58,35 +74,51 @@ const AlphabetGrid: React.FC = () => {
         const hasIdeas = count > 0;
         const hasCompleted = hasCompletedIdeasForLetter(letter);
         const themeColor = getLetterColor();
+        const isAll = letter === 'ALL';
 
         return (
             <TouchableOpacity
                 style={[
                     styles.letterBox,
-                    hasIdeas ? [styles.hasIdeas, { borderColor: themeColor }] : styles.noIdeas,
-                    hasCompleted && styles.completedLetterBox
+                    isAll && { backgroundColor: themeColor, borderColor: themeColor },
+                    !isAll && hasIdeas && [styles.hasIdeas, { borderColor: themeColor }],
+                    !isAll && !hasIdeas && styles.noIdeas,
+                    !isAll && hasCompleted && styles.completedLetterBox
                 ]}
                 onPress={() => handleLetterPress(letter)}
                 disabled={!hasIdeas}
             >
-                {hasCompleted && (
+                {!isAll && hasCompleted && (
                     <View style={styles.completedCheck}>
                         <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
                     </View>
                 )}
-                <Text style={[
-                    styles.letter,
-                    hasIdeas ? [styles.letterActive, { color: themeColor }] : styles.letterInactive,
-                    hasCompleted && styles.completedLetter
-                ]}>
-                    {letter}
-                </Text>
+
+                {isAll ? (
+                    <Ionicons name="apps" size={32} color="#FFFFFF" />
+                ) : (
+                    <Text style={[
+                        styles.letter,
+                        hasIdeas ? [styles.letterActive, { color: themeColor }] : styles.letterInactive,
+                        hasCompleted && styles.completedLetter
+                    ]}>
+                        {letter}
+                    </Text>
+                )}
+
                 {hasIdeas && (
                     <View style={[
                         styles.countBadge,
-                        { backgroundColor: hasCompleted ? '#4CAF50' : themeColor }
+                        isAll
+                            ? { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: themeColor }
+                            : { backgroundColor: hasCompleted ? '#4CAF50' : themeColor }
                     ]}>
-                        <Text style={styles.count}>{count}</Text>
+                        <Text style={[
+                            styles.count,
+                            isAll && { color: themeColor }
+                        ]}>
+                            {count}
+                        </Text>
                     </View>
                 )}
             </TouchableOpacity>
@@ -106,7 +138,7 @@ const AlphabetGrid: React.FC = () => {
     return (
         <View style={styles.container}>
             <FlatList
-                data={ALPHABET}
+                data={GRID_DATA}
                 renderItem={renderItem}
                 keyExtractor={(item) => item}
                 numColumns={4}
