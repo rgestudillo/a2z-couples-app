@@ -20,10 +20,12 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const handlePress = () => {
-        // Navigate to product details screen (to be implemented)
+        // Navigate to product details screen
         console.log(`Navigate to product: ${product.id}`);
-        // Uncomment when product detail screen is ready
-        // router.push(`/product/${product.id}` as any);
+        router.push({
+            pathname: "/product/[id]",
+            params: { id: product.id }
+        });
     };
 
     return (
