@@ -13,7 +13,7 @@ interface ProductCardProps {
         rating: number;
         imageUrl: string;
         affiliateLink: string;
-        relatedIdeaIds: string[];
+        relatedGiftIds: string[];
         tags: string[];
     };
 }

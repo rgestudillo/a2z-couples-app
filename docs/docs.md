@@ -217,7 +217,6 @@ interface DateIdea extends BaseIdea {
 ```typescript
 interface GiftIdea extends BaseIdea {
   occasion: string[];
-  relatedProductIds: string[];
 }
 ```
 
@@ -250,7 +249,7 @@ interface Product {
   rating: number;
   imageUrl?: string;
   affiliateLink: string;
-  relatedIdeaIds: string[];
+  relatedGiftIds: string[];
   tags: string[];
 }
 ```

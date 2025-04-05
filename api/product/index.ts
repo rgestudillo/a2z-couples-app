@@ -1,12 +1,17 @@
 import { Product } from '@/model/Product';
 import products from './data';
 
-// Helper function to get products related to a specific idea
+// Helper function to get products related to a specific gift idea
 export function getProductsByIdeaId(ideaId: string): Product[] {
-    return products.filter(product => product.relatedIdeaIds.includes(ideaId));
+    return products.filter(product => product.relatedGiftIds.includes(ideaId));
 }
 
-// Helper function to get a specific product by ID
+// More specifically named helper function
+export function getProductsByGiftId(giftId: string): Product[] {
+    return products.filter(product => product.relatedGiftIds.includes(giftId));
+}
+
+// Find a product by ID
 export function getProductById(id: string): Product | undefined {
     return products.find(product => product.id === id);
 }

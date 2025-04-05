@@ -10,7 +10,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Technology', 'Wearables'],
         occasion: ['Birthday', 'Anniversary'],
-        relatedProductIds: ['prod-1'],
         image: 'https://example.com/apple-watch.jpg'
     },
     {
@@ -21,7 +20,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Home', 'Comfort'],
         occasion: ['Christmas', 'Housewarming'],
-        relatedProductIds: ['prod-2'],
         image: 'https://example.com/blanket.jpg'
     },
     {
@@ -32,7 +30,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Food', 'Sweets'],
         occasion: ['Valentine\'s Day', 'Thank You'],
-        relatedProductIds: ['prod-3'],
         image: 'https://example.com/chocolate.jpg'
     },
     {
@@ -43,7 +40,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Home', 'Luxury'],
         occasion: ['Anniversary', 'Housewarming'],
-        relatedProductIds: ['prod-4'],
         image: 'https://example.com/decanter.jpg'
     },
     {
@@ -54,7 +50,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Wellness', 'Home'],
         occasion: ['Birthday', 'Christmas'],
-        relatedProductIds: ['prod-5'],
         image: 'https://example.com/diffuser.jpg'
     },
     {
@@ -65,7 +60,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Technology', 'Fitness'],
         occasion: ['Birthday', 'New Year'],
-        relatedProductIds: ['prod-6'],
         image: 'https://example.com/fitness-tracker.jpg'
     },
     {
@@ -76,7 +70,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Technology', 'Entertainment'],
         occasion: ['Birthday', 'Christmas'],
-        relatedProductIds: ['prod-7'],
         image: 'https://example.com/gaming-console.jpg'
     },
     {
@@ -87,7 +80,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Technology', 'Music'],
         occasion: ['Birthday', 'Graduation'],
-        relatedProductIds: ['prod-8'],
         image: 'https://example.com/headphones.jpg'
     },
     {
@@ -98,7 +90,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Home', 'Nature'],
         occasion: ['Housewarming', 'Thank You'],
-        relatedProductIds: ['prod-9'],
         image: 'https://example.com/indoor-plants.jpg'
     },
     {
@@ -109,7 +100,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Accessories', 'Storage'],
         occasion: ['Anniversary', 'Birthday'],
-        relatedProductIds: ['prod-10'],
         image: 'https://example.com/jewelry-box.jpg'
     },
     {
@@ -120,7 +110,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Kitchen', 'Practical'],
         occasion: ['Housewarming', 'Wedding'],
-        relatedProductIds: ['prod-11'],
         image: 'https://example.com/kitchen-gadgets.jpg'
     },
     {
@@ -131,7 +120,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Accessories', 'Fashion'],
         occasion: ['Birthday', 'Graduation'],
-        relatedProductIds: ['prod-12'],
         image: 'https://example.com/leather-wallet.jpg'
     },
     {
@@ -142,7 +130,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Wellness', 'Fitness'],
         occasion: ['Birthday', 'Anniversary'],
-        relatedProductIds: ['prod-13'],
         image: 'https://example.com/massage-gun.jpg'
     },
     {
@@ -153,7 +140,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Jewelry', 'Fashion'],
         occasion: ['Anniversary', 'Valentine\'s Day'],
-        relatedProductIds: ['prod-14'],
         image: 'https://example.com/necklace.jpg'
     },
     {
@@ -164,7 +150,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Kitchen', 'Outdoor'],
         occasion: ['Housewarming', 'Christmas'],
-        relatedProductIds: ['prod-15'],
         image: 'https://example.com/pizza-oven.jpg'
     },
     {
@@ -175,7 +160,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Technology', 'Photography'],
         occasion: ['Birthday', 'Graduation'],
-        relatedProductIds: ['prod-16'],
         image: 'https://example.com/polaroid.jpg'
     },
     {
@@ -186,7 +170,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Home', 'Handmade'],
         occasion: ['Wedding', 'Housewarming'],
-        relatedProductIds: ['prod-17'],
         image: 'https://example.com/quilt.jpg'
     },
     {
@@ -197,7 +180,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Music', 'Technology'],
         occasion: ['Birthday', 'Christmas'],
-        relatedProductIds: ['prod-18'],
         image: 'https://example.com/record-player.jpg'
     },
     {
@@ -208,7 +190,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Technology', 'Fitness'],
         occasion: ['Birthday', 'Anniversary'],
-        relatedProductIds: ['prod-19'],
         image: 'https://example.com/smartwatch.jpg'
     },
     {
@@ -219,7 +200,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Travel', 'Accessories'],
         occasion: ['Graduation', 'Birthday'],
-        relatedProductIds: ['prod-20'],
         image: 'https://example.com/travel-backpack.jpg'
     },
     {
@@ -230,7 +210,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$',
         category: ['Accessories', 'Practical'],
         occasion: ['Housewarming', 'Thank You'],
-        relatedProductIds: ['prod-21'],
         image: 'https://example.com/umbrella.jpg'
     },
     {
@@ -241,7 +220,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$$',
         category: ['Technology', 'Entertainment'],
         occasion: ['Birthday', 'Christmas'],
-        relatedProductIds: ['prod-22'],
         image: 'https://example.com/vr-headset.jpg'
     },
     {
@@ -252,7 +230,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Technology', 'Music'],
         occasion: ['Birthday', 'Graduation'],
-        relatedProductIds: ['prod-23'],
         image: 'https://example.com/wireless-earbuds.jpg'
     },
     {
@@ -263,7 +240,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$$',
         category: ['Gaming', 'Digital'],
         occasion: ['Birthday', 'Thank You'],
-        relatedProductIds: ['prod-24'],
         image: 'https://example.com/xbox-card.jpg'
     },
     {
@@ -274,7 +250,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$',
         category: ['Fitness', 'Wellness'],
         occasion: ['Birthday', 'New Year'],
-        relatedProductIds: ['prod-25'],
         image: 'https://example.com/yoga-mat.jpg'
     },
     {
@@ -285,7 +260,6 @@ const giftIdeas: GiftIdea[] = [
         cost: '$',
         category: ['Wellness', 'Decor'],
         occasion: ['Thank You', 'Housewarming'],
-        relatedProductIds: ['prod-26'],
         image: 'https://example.com/zen-garden.jpg'
     }
 ];

@@ -9,7 +9,7 @@ import BusinessCard from '@/components/BusinessCard';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MemoriesGallery } from '@/components/memories';
-import { getProductsByIdeaId } from '@/api/product';
+import { getProductsByGiftId } from '@/api/product';
 import { Product } from '@/model/Product';
 
 interface ProductCardProps {
@@ -66,7 +66,7 @@ export default function IdeaDetailScreen() {
 
     // Get related items based on idea type
     const relatedBusinesses = (ideaType === IdeaType.DATE && id) ? getBusinessesByIdeaId(id) : [];
-    const relatedProducts = (ideaType === IdeaType.GIFT && id) ? getProductsByIdeaId(id) : [];
+    const relatedProducts = (ideaType === IdeaType.GIFT && id) ? getProductsByGiftId(id) : [];
 
     // New states for modal and images
     const [congratsModalVisible, setCongratsModalVisible] = useState(false);

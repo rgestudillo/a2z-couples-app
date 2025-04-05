@@ -11,7 +11,7 @@ const products: Product[] = [
         rating: 4.8,
         imageUrl: 'https://example.com/apple-watch.jpg',
         affiliateLink: 'https://amazon.com/product/123',
-        relatedIdeaIds: ['gift-1'],
+        relatedGiftIds: ['gift-1'],
         tags: ['Technology', 'Wearables', 'Health']
     },
     {
@@ -23,7 +23,7 @@ const products: Product[] = [
         rating: 4.6,
         imageUrl: 'https://example.com/blanket.jpg',
         affiliateLink: 'https://amazon.com/product/456',
-        relatedIdeaIds: ['gift-2'],
+        relatedGiftIds: ['gift-2'],
         tags: ['Home', 'Comfort', 'Sleep']
     },
     {
@@ -35,7 +35,7 @@ const products: Product[] = [
         rating: 4.5,
         imageUrl: 'https://example.com/chocolate.jpg',
         affiliateLink: 'https://amazon.com/product/789',
-        relatedIdeaIds: ['gift-3'],
+        relatedGiftIds: ['gift-3'],
         tags: ['Food', 'Sweets', 'Gift']
     },
     {
@@ -47,7 +47,7 @@ const products: Product[] = [
         rating: 4.7,
         imageUrl: 'https://example.com/decanter.jpg',
         affiliateLink: 'https://amazon.com/product/101',
-        relatedIdeaIds: ['gift-4'],
+        relatedGiftIds: ['gift-4'],
         tags: ['Home', 'Luxury', 'Barware']
     },
     {
@@ -59,7 +59,7 @@ const products: Product[] = [
         rating: 4.4,
         imageUrl: 'https://example.com/diffuser.jpg',
         affiliateLink: 'https://amazon.com/product/202',
-        relatedIdeaIds: ['gift-5'],
+        relatedGiftIds: ['gift-5'],
         tags: ['Wellness', 'Home', 'Relaxation']
     },
     {
@@ -71,7 +71,7 @@ const products: Product[] = [
         rating: 4.6,
         imageUrl: 'https://example.com/fitness-tracker.jpg',
         affiliateLink: 'https://amazon.com/product/303',
-        relatedIdeaIds: ['gift-6'],
+        relatedGiftIds: ['gift-6'],
         tags: ['Technology', 'Fitness', 'Health']
     },
     {
@@ -83,7 +83,7 @@ const products: Product[] = [
         rating: 4.9,
         imageUrl: 'https://example.com/gaming-console.jpg',
         affiliateLink: 'https://amazon.com/product/404',
-        relatedIdeaIds: ['gift-7'],
+        relatedGiftIds: ['gift-7'],
         tags: ['Technology', 'Entertainment', 'Gaming']
     },
     {
@@ -95,7 +95,7 @@ const products: Product[] = [
         rating: 4.8,
         imageUrl: 'https://example.com/headphones.jpg',
         affiliateLink: 'https://amazon.com/product/505',
-        relatedIdeaIds: ['gift-8'],
+        relatedGiftIds: ['gift-8'],
         tags: ['Technology', 'Music', 'Audio']
     },
     {
@@ -107,7 +107,7 @@ const products: Product[] = [
         rating: 4.5,
         imageUrl: 'https://example.com/indoor-plants.jpg',
         affiliateLink: 'https://amazon.com/product/606',
-        relatedIdeaIds: ['gift-9'],
+        relatedGiftIds: ['gift-9'],
         tags: ['Home', 'Nature', 'Decor']
     },
     {
@@ -119,7 +119,7 @@ const products: Product[] = [
         rating: 4.7,
         imageUrl: 'https://example.com/jewelry-box.jpg',
         affiliateLink: 'https://amazon.com/product/707',
-        relatedIdeaIds: ['gift-10'],
+        relatedGiftIds: ['gift-10'],
         tags: ['Accessories', 'Storage', 'Home']
     },
     {
@@ -131,7 +131,7 @@ const products: Product[] = [
         rating: 4.4,
         imageUrl: 'https://example.com/kitchen-gadgets.jpg',
         affiliateLink: 'https://amazon.com/product/808',
-        relatedIdeaIds: ['gift-11'],
+        relatedGiftIds: ['gift-11'],
         tags: ['Kitchen', 'Practical', 'Cooking']
     },
     {
@@ -143,7 +143,7 @@ const products: Product[] = [
         rating: 4.8,
         imageUrl: 'https://example.com/leather-wallet.jpg',
         affiliateLink: 'https://amazon.com/product/909',
-        relatedIdeaIds: ['gift-12'],
+        relatedGiftIds: ['gift-12'],
         tags: ['Accessories', 'Fashion', 'Practical']
     },
     {
@@ -155,7 +155,7 @@ const products: Product[] = [
         rating: 4.7,
         imageUrl: 'https://example.com/massage-gun.jpg',
         affiliateLink: 'https://amazon.com/product/1010',
-        relatedIdeaIds: ['gift-13'],
+        relatedGiftIds: ['gift-13'],
         tags: ['Wellness', 'Fitness', 'Recovery']
     },
     {
@@ -167,7 +167,7 @@ const products: Product[] = [
         rating: 4.9,
         imageUrl: 'https://example.com/necklace.jpg',
         affiliateLink: 'https://amazon.com/product/1111',
-        relatedIdeaIds: ['gift-14'],
+        relatedGiftIds: ['gift-14'],
         tags: ['Jewelry', 'Fashion', 'Romantic']
     },
     {
@@ -179,7 +179,7 @@ const products: Product[] = [
         rating: 4.8,
         imageUrl: 'https://example.com/pizza-oven.jpg',
         affiliateLink: 'https://amazon.com/product/1212',
-        relatedIdeaIds: ['gift-15'],
+        relatedGiftIds: ['gift-15'],
         tags: ['Kitchen', 'Outdoor', 'Cooking']
     },
     {
@@ -191,7 +191,7 @@ const products: Product[] = [
         rating: 4.5,
         imageUrl: 'https://example.com/polaroid.jpg',
         affiliateLink: 'https://amazon.com/product/1313',
-        relatedIdeaIds: ['gift-16'],
+        relatedGiftIds: ['gift-16'],
         tags: ['Technology', 'Photography', 'Creative']
     },
     {
@@ -203,7 +203,7 @@ const products: Product[] = [
         rating: 4.7,
         imageUrl: 'https://example.com/quilt.jpg',
         affiliateLink: 'https://amazon.com/product/1414',
-        relatedIdeaIds: ['gift-17'],
+        relatedGiftIds: ['gift-17'],
         tags: ['Home', 'Handmade', 'Bedding']
     },
     {
@@ -215,7 +215,7 @@ const products: Product[] = [
         rating: 4.6,
         imageUrl: 'https://example.com/record-player.jpg',
         affiliateLink: 'https://amazon.com/product/1515',
-        relatedIdeaIds: ['gift-18'],
+        relatedGiftIds: ['gift-18'],
         tags: ['Music', 'Technology', 'Entertainment']
     },
     {
@@ -227,7 +227,7 @@ const products: Product[] = [
         rating: 4.7,
         imageUrl: 'https://example.com/smartwatch.jpg',
         affiliateLink: 'https://amazon.com/product/1616',
-        relatedIdeaIds: ['gift-19'],
+        relatedGiftIds: ['gift-19'],
         tags: ['Technology', 'Fitness', 'Wearables']
     },
     {
@@ -239,7 +239,7 @@ const products: Product[] = [
         rating: 4.6,
         imageUrl: 'https://example.com/travel-backpack.jpg',
         affiliateLink: 'https://amazon.com/product/1717',
-        relatedIdeaIds: ['gift-20'],
+        relatedGiftIds: ['gift-20'],
         tags: ['Travel', 'Accessories', 'Practical']
     },
     {
@@ -251,7 +251,7 @@ const products: Product[] = [
         rating: 4.5,
         imageUrl: 'https://example.com/umbrella.jpg',
         affiliateLink: 'https://amazon.com/product/1818',
-        relatedIdeaIds: ['gift-21'],
+        relatedGiftIds: ['gift-21'],
         tags: ['Accessories', 'Practical', 'Weather']
     },
     {
@@ -263,7 +263,7 @@ const products: Product[] = [
         rating: 4.8,
         imageUrl: 'https://example.com/vr-headset.jpg',
         affiliateLink: 'https://amazon.com/product/1919',
-        relatedIdeaIds: ['gift-22'],
+        relatedGiftIds: ['gift-22'],
         tags: ['Technology', 'Entertainment', 'Gaming']
     },
     {
@@ -275,7 +275,7 @@ const products: Product[] = [
         rating: 4.7,
         imageUrl: 'https://example.com/wireless-earbuds.jpg',
         affiliateLink: 'https://amazon.com/product/2020',
-        relatedIdeaIds: ['gift-23'],
+        relatedGiftIds: ['gift-23'],
         tags: ['Technology', 'Music', 'Audio']
     },
     {
@@ -287,7 +287,7 @@ const products: Product[] = [
         rating: 4.9,
         imageUrl: 'https://example.com/xbox-card.jpg',
         affiliateLink: 'https://amazon.com/product/2121',
-        relatedIdeaIds: ['gift-24'],
+        relatedGiftIds: ['gift-24'],
         tags: ['Gaming', 'Digital', 'Entertainment']
     },
     {
@@ -299,7 +299,7 @@ const products: Product[] = [
         rating: 4.6,
         imageUrl: 'https://example.com/yoga-mat.jpg',
         affiliateLink: 'https://amazon.com/product/2222',
-        relatedIdeaIds: ['gift-25'],
+        relatedGiftIds: ['gift-25'],
         tags: ['Fitness', 'Wellness', 'Eco-Friendly']
     },
     {
@@ -311,7 +311,7 @@ const products: Product[] = [
         rating: 4.4,
         imageUrl: 'https://example.com/zen-garden.jpg',
         affiliateLink: 'https://amazon.com/product/2323',
-        relatedIdeaIds: ['gift-26'],
+        relatedGiftIds: ['gift-26'],
         tags: ['Wellness', 'Decor', 'Mindfulness']
     }
 ];

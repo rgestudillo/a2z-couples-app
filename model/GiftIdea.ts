@@ -6,6 +6,5 @@ export interface GiftIdea {
     cost: '$' | '$$' | '$$$';
     category: string[];
     occasion: string[];
-    relatedProductIds: string[];
     image?: string;
 }

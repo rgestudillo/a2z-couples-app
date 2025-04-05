@@ -1,51 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, SafeAreaView, TextInput, TouchableOpacity, Image } from 'react-native';
 import { getAllBusinesses } from '@/api/business';
+import { getAllProducts } from '@/api/product';
 import { Business } from '@/model/Business';
+import { Product } from '@/model/Product';
 import BusinessCard from '@/components/BusinessCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useIdeas, IdeaType, GiftIdea } from '@/context/IdeasContext';
 import ProductCard from '@/components/ProductCard';
-
-// Mock product data - to be replaced with actual API/data later
-const mockProducts = [
-    {
-        id: 'prod-1',
-        name: 'Apple Watch Series 7',
-        description: 'The latest Apple Watch with advanced health features',
-        price: 399.99,
-        priceRange: '$$$' as const,
-        rating: 4.8,
-        imageUrl: 'https://example.com/apple-watch.jpg',
-        affiliateLink: 'https://amazon.com/product/123',
-        relatedIdeaIds: ['gift-1'],
-        tags: ['Technology', 'Wearables']
-    },
-    {
-        id: 'prod-2',
-        name: 'Weighted Blanket',
-        description: 'Premium weighted blanket for better sleep and relaxation',
-        price: 89.99,
-        priceRange: '$$' as const,
-        rating: 4.6,
-        imageUrl: 'https://example.com/blanket.jpg',
-        affiliateLink: 'https://amazon.com/product/456',
-        relatedIdeaIds: ['gift-2'],
-        tags: ['Home', 'Comfort']
-    },
-    {
-        id: 'prod-3',
-        name: 'Gourmet Chocolate Box',
-        description: 'Assorted gourmet chocolates in an elegant gift box',
-        price: 45.99,
-        priceRange: '$$' as const,
-        rating: 4.5,
-        imageUrl: 'https://example.com/chocolate.jpg',
-        affiliateLink: 'https://amazon.com/product/789',
-        relatedIdeaIds: ['gift-3'],
-        tags: ['Food', 'Sweets']
-    }
-];
 
 // Define browse sections
 enum BrowseSection {
@@ -56,6 +18,7 @@ enum BrowseSection {
 const BrowseScreen = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const allBusinesses = getAllBusinesses();
+    const allProducts = getAllProducts();
     const { currentCategory, setCurrentCategory, allIdeas } = useIdeas();
     const [activeSection, setActiveSection] = useState<BrowseSection>(
         currentCategory === IdeaType.DATE ? BrowseSection.PLACES : BrowseSection.PRODUCTS
@@ -91,7 +54,7 @@ const BrowseScreen = () => {
     );
 
     // Filter products based on search term
-    const filteredProducts = mockProducts.filter((product) =>
+    const filteredProducts = allProducts.filter((product: Product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
         product.description.toLowerCase().includes(searchTerm.toLowerCase())

@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import dateIdeas from '@/api/date';
-import giftIdeas from '@/api/gift';
-
+import { getAllDateIdeas, getDateIdeasByLetter, getDateIdeaById } from '@/api/date';
+import { getAllGiftIdeas, getGiftIdeasByLetter, getGiftIdeaById } from '@/api/gift';
+import { getBusinessById, getBusinessesByIdeaId } from '@/api/business';
 import { Business } from '@/model/Business';
 import { DateIdea } from '@/model/DateIdea';
 import { GiftIdea } from '@/model/GiftIdea';
@@ -185,9 +185,6 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             return prev;
         });
 
-        // Import needed function from businesses module
-        const { getBusinessById } = require('../api/business');
-
         // Get the business details to find its related idea
         const business = getBusinessById(businessId);
         if (business && business.relatedIdeaIds.length > 0) {
@@ -203,9 +200,6 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCompletedBusinesses((prev) =>
             prev.filter((id) => id !== businessId)
         );
-
-        // Import needed functions from businesses module
-        const { getBusinessById, getBusinessesByIdeaId } = require('../api/business');
 
         // Get the business details to find its related idea
         const business = getBusinessById(businessId);
@@ -236,17 +230,23 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [completedBusinesses]);
 
     const getIdeasByLetter = useCallback((type: IdeaType, letter: string) => {
-        const ideas = type === IdeaType.DATE ? dateIdeas : giftIdeas;
-        return ideas.filter((idea) => idea.letter === letter.toUpperCase());
+        if (type === IdeaType.DATE) {
+            return getDateIdeasByLetter(letter);
+        } else {
+            return getGiftIdeasByLetter(letter);
+        }
     }, []);
 
     const getIdeaById = useCallback((type: IdeaType, id: string) => {
-        const ideas = type === IdeaType.DATE ? dateIdeas : giftIdeas;
-        return ideas.find((idea) => idea.id === id);
+        if (type === IdeaType.DATE) {
+            return getDateIdeaById(id);
+        } else {
+            return getGiftIdeaById(id);
+        }
     }, []);
 
     const getFavoriteIdeas = useCallback((type: IdeaType) => {
-        const ideas = type === IdeaType.DATE ? dateIdeas : giftIdeas;
+        const ideas = type === IdeaType.DATE ? getAllDateIdeas() : getAllGiftIdeas();
         return ideas.filter((idea) => (favoriteIdeas[type] || []).includes(idea.id));
     }, [favoriteIdeas]);
 
@@ -255,8 +255,8 @@ export const IdeasProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const contextValue = {
         allIdeas: {
-            [IdeaType.DATE]: dateIdeas,
-            [IdeaType.GIFT]: giftIdeas
+            [IdeaType.DATE]: getAllDateIdeas(),
+            [IdeaType.GIFT]: getAllGiftIdeas()
         },
         currentCategory,
         setCurrentCategory,

@@ -32,8 +32,8 @@ export default function ProductDetailScreen() {
     }
 
     // Find related gift ideas - only executed if product exists
-    const relatedGiftIdeas = product.relatedIdeaIds
-        .map(ideaId => allIdeas[IdeaType.GIFT].find(idea => idea.id === ideaId))
+    const relatedGiftIdeas = product.relatedGiftIds
+        .map(giftId => allIdeas[IdeaType.GIFT].find(idea => idea.id === giftId))
         .filter((idea): idea is GiftIdea => idea !== undefined);
 
     const handleBuyNow = () => {
@@ -194,24 +194,23 @@ const styles = StyleSheet.create({
         color: '#888',
     },
     buyButton: {
-        backgroundColor: '#5a67d8',
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'center',
-        padding: 16,
-        borderRadius: 12,
-        marginVertical: 16,
+        alignItems: 'center',
+        backgroundColor: '#ff6b6b',
+        paddingVertical: 16,
+        borderRadius: 8,
+        marginBottom: 16,
     },
     buyButtonText: {
         color: '#fff',
-        fontWeight: '600',
         fontSize: 18,
-        marginLeft: 10,
+        fontWeight: '600',
+        marginLeft: 8,
     },
     affiliateDisclaimer: {
         fontSize: 12,
         color: '#999',
         textAlign: 'center',
-        marginBottom: 20,
     },
 }); 
