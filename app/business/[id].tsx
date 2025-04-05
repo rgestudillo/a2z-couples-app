@@ -24,6 +24,7 @@ export default function BusinessDetailScreen() {
             setLoading(true);
             const businessData = await getBusinessById(id);
             setBusiness(businessData);
+            console.log("businessData", businessData);
             if (!businessData) {
                 setError("Business not found");
             } else {
